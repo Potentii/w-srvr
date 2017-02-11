@@ -1,0 +1,39 @@
+{
+  "name": "w-srvr",
+  "version": "1.0.0",
+  "description": "A simple web server configurator for Expressjs",
+  "author": "Guilherme Reginaldo Ruella <potentii@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+    "web",
+    "server",
+    "configurator",
+    "express"
+  ],
+  "scripts": {
+    "test": "node test/test.js"
+  },
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Potentii/w-srvr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Potentii/w-srvr/issues"
+  },
+  "homepage": "https://github.com/Potentii/w-srvr#readme",
+  "files": [
+    "main.js",
+    "libs/",
+    "test/"
+  ],
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "callsite": "^1.0.0",
+    "express": "^4.14.1"
+  },
+  "devDependencies": {
+    "mocha": "^3.2.0",
+    "chai": "^3.5.0"
+  }
+}
