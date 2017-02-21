@@ -19,7 +19,7 @@ const sockets = {};
  */
 function start(settings){
    // *Checking if the settings wasn't set, and if didn't, rejecting the promise:
-   if(!settings) return Promise.reject(new Error('Missing server boot settings'));
+   if(!settings) return Promise.reject(new Error('Missing w-srvr boot settings'));
 
    // *Starting the web server:
    return startServer(settings)
@@ -57,6 +57,7 @@ function startServer({server_port, spa_file, static_resources, api_resources}){
    // *Returning the starting promise:
    return new Promise((resolve, reject) => {
       // *Requiring the needed modules:
+      const url = require('url');
       const methods_enum = require('./methods.js');
       // *Preparing the Expressjs instance:
       const express = require('express');
@@ -174,9 +175,9 @@ function startServer({server_port, spa_file, static_resources, api_resources}){
             let address = server.address();
 
             // *Resolving the promise:
-            resolve({address: `http://${address.address==='::'?'localhost':address.address}:${address.port}/`});
+            resolve({address: url.parse(`http://${address.address==='::'?'localhost':address.address}:${address.port}/`)});
          }).on('error', err => {
-            // TODO test
+            // *Rejecting the promise:
             reject(err);
          });
 

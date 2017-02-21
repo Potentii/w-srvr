@@ -18,7 +18,7 @@ module.exports = class Configurator{
     */
    constructor(){
       // *Initializing the server options:
-      this._port = 3000;
+      this._server_port = 80;
       this._spa_file = null;
       this._static_resources = [];
       this._api_resources = [];
@@ -31,13 +31,23 @@ module.exports = class Configurator{
 
 
    /**
-    * Sets the server port
-    * @param  {number|string} port The port to listen on
-    * @return {Configurator}       This configurator (for method chaining)
+    * Retrieves the HTTP methods enum
     */
-   port(port){
+   static get METHODS(){
+      // *Returning the enum:
+      return methods_enum;
+   }
+
+
+
+   /**
+    * Sets the server port
+    * @param  {number|string} port_number The port which the server will run on
+    * @return {Configurator}              This configurator (for method chaining)
+    */
+   port(port_number){
       // *Setting the server port:
-      this._server_port = port;
+      this._server_port = port_number;
       // *Returning this configurator:
       return this;
    }
@@ -61,7 +71,7 @@ module.exports = class Configurator{
 
 
    /**
-    * Serves a static directory or file, with the given server route
+    * Serves a static directory or file, on the given server route
     * @param  {string} route         The server route
     * @param  {string} resource_path The relative file/directory path
     * @return {Configurator}         This configurator (for method chaining)
@@ -78,10 +88,10 @@ module.exports = class Configurator{
 
 
    /**
-    * Registers a middleware for a specific route and method
+    * Registers a middleware for a specific route and HTTP method
     * @param  {string} method                  An HTTP method (GET, POST, PUT, DELETE, OPTIONS)
     * @param  {string} route                   The server route
-    * @param  {function|function[]} middleware The Expressjs middleware function
+    * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {Configurator}                   This configurator (for method chaining)
     */
    api(method, route, middleware){
@@ -96,7 +106,7 @@ module.exports = class Configurator{
    /**
     * Registers a middleware for a specific GET route
     * @param  {string} route                   The server route
-    * @param  {function|function[]} middleware The Expressjs middleware function
+    * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {Configurator}                   This configurator (for method chaining)
     */
    apiGET(route, middleware){
@@ -108,7 +118,7 @@ module.exports = class Configurator{
    /**
     * Registers a middleware for a specific POST route
     * @param  {string} route                   The server route
-    * @param  {function|function[]} middleware The Expressjs middleware function
+    * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {Configurator}                   This configurator (for method chaining)
     */
    apiPOST(route, middleware){
@@ -120,7 +130,7 @@ module.exports = class Configurator{
    /**
     * Registers a middleware for a specific PUT route
     * @param  {string} route                   The server route
-    * @param  {function|function[]} middleware The Expressjs middleware function
+    * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {Configurator}                   This configurator (for method chaining)
     */
    apiPUT(route, middleware){
@@ -132,21 +142,11 @@ module.exports = class Configurator{
    /**
     * Registers a middleware for a specific DELETE route
     * @param  {string} route                   The server route
-    * @param  {function|function[]} middleware The Expressjs middleware function
+    * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {Configurator}                   This configurator (for method chaining)
     */
    apiDELETE(route, middleware){
       return this.api(Configurator.METHODS.DELETE, route, middleware);
-   }
-
-
-
-   /**
-    * Retrieves the HTTP methods enum
-    */
-   static get METHODS(){
-      // *Returning the enum:
-      return methods_enum;
    }
 
 
