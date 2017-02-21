@@ -151,7 +151,7 @@ If the server could not be stopped for some reason, the promise will reject with
 ### Static content for a website
 
 Lets say your website content is located under the `src` folder:
-```txt
+```
 ├── main.js
 └── src
     ├── css
@@ -215,7 +215,7 @@ srvr.port(3000)
 
 <br>
 As your server starts to grow and gets more complex, you may want to organize your routes in separate files, so lets say you have the following project structure:
-```txt
+```
 ├── main.js
 └── routes
     └── users.js
