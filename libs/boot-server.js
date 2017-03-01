@@ -92,7 +92,7 @@ function startServer({server_port, spa_file, static_resources, api_resources}){
 
 
          // *Getting each dynamic resource:
-         for(let { method, route, middleware } of api_resources){
+         for(let { method, route, middleware } of api_resources){            
             // *Checking the method type:
             switch(method){
             case methods_enum.GET:

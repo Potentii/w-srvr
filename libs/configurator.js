@@ -1,9 +1,7 @@
 // *Requiring the needed modules:
+const StaticConfigurator = require('./static-configurator.js');
+const APIConfigurator = require('./api-configurator.js');
 const boot_server = require('./boot-server.js');
-const methods_enum = require('./methods.js');
-const stack = require('callsite');
-const path = require('path');
-
 
 
 
@@ -19,9 +17,10 @@ module.exports = class Configurator{
    constructor(){
       // *Initializing the server options:
       this._server_port = 80;
-      this._spa_file = null;
-      this._static_resources = [];
-      this._api_resources = [];
+
+      // *Initializing the inner configurators:
+      this._static = new StaticConfigurator(this);
+      this._api = new APIConfigurator(this);
 
       // *Declaring the server promises:
       this._server_start_promise = null;
@@ -31,11 +30,11 @@ module.exports = class Configurator{
 
 
    /**
-    * Retrieves the HTTP methods enum
+    * Retrieves the supported HTTP methods enum
     */
    static get METHODS(){
       // *Returning the enum:
-      return methods_enum;
+      return APIConfigurator.METHODS;
    }
 
 
@@ -55,103 +54,6 @@ module.exports = class Configurator{
 
 
    /**
-    * Sets the main HTML file
-    * @param  {string} file  The relative file path
-    * @return {Configurator} This configurator (for method chaining)
-    */
-   spa(file){
-      // *Resolving the caller method '__dirname':
-      let caller_dir = path.dirname(stack()[1].getFileName());
-      // *Setting the file name:
-      this._spa_file = path.join(caller_dir, file);
-      // *Returning this configurator:
-      return this;
-   }
-
-
-
-   /**
-    * Serves a static directory or file, on the given server route
-    * @param  {string} route         The server route
-    * @param  {string} resource_path The relative file/directory path
-    * @return {Configurator}         This configurator (for method chaining)
-    */
-   serve(route, resource_path){
-      // *Resolving the caller method '__dirname':
-      let caller_dir = path.dirname(stack()[1].getFileName());
-      // *Adding this resource into the array:
-      this._static_resources.push({route, path: path.join(caller_dir, resource_path)});
-      // *Returning this configurator:
-      return this;
-   }
-
-
-
-   /**
-    * Registers a middleware for a specific route and HTTP method
-    * @param  {string} method                  An HTTP method (GET, POST, PUT, DELETE, OPTIONS)
-    * @param  {string} route                   The server route
-    * @param  {function|function[]} middleware A valid Expressjs middleware function
-    * @return {Configurator}                   This configurator (for method chaining)
-    */
-   api(method, route, middleware){
-      // *Adding this resource into the array:
-      this._api_resources.push({method, route, middleware});
-      // *Returning this configurator:
-      return this;
-   }
-
-
-
-   /**
-    * Registers a middleware for a specific GET route
-    * @param  {string} route                   The server route
-    * @param  {function|function[]} middleware A valid Expressjs middleware function
-    * @return {Configurator}                   This configurator (for method chaining)
-    */
-   apiGET(route, middleware){
-      return this.api(Configurator.METHODS.GET, route, middleware);
-   }
-
-
-
-   /**
-    * Registers a middleware for a specific POST route
-    * @param  {string} route                   The server route
-    * @param  {function|function[]} middleware A valid Expressjs middleware function
-    * @return {Configurator}                   This configurator (for method chaining)
-    */
-   apiPOST(route, middleware){
-      return this.api(Configurator.METHODS.POST, route, middleware);
-   }
-
-
-
-   /**
-    * Registers a middleware for a specific PUT route
-    * @param  {string} route                   The server route
-    * @param  {function|function[]} middleware A valid Expressjs middleware function
-    * @return {Configurator}                   This configurator (for method chaining)
-    */
-   apiPUT(route, middleware){
-      return this.api(Configurator.METHODS.PUT, route, middleware);
-   }
-
-
-
-   /**
-    * Registers a middleware for a specific DELETE route
-    * @param  {string} route                   The server route
-    * @param  {function|function[]} middleware A valid Expressjs middleware function
-    * @return {Configurator}                   This configurator (for method chaining)
-    */
-   apiDELETE(route, middleware){
-      return this.api(Configurator.METHODS.DELETE, route, middleware);
-   }
-
-
-
-   /**
     * Starts the server instance
     * @return {Promise} The promise resolves into an info object containing the 'address' of the server, or it rejects if the server could not be started
     */
@@ -162,9 +64,9 @@ module.exports = class Configurator{
       // *Setting the server start promise:
       this._server_start_promise = boot_server.start({
             server_port: this._server_port,
-            spa_file: this._spa_file,
-            static_resources: this._static_resources,
-            api_resources: this._api_resources
+            spa_file: this._static.spa_file,
+            static_resources: this._static.resources,
+            api_resources: this._api.resources
          })
          .then(info => {
             // *Cleaning the stop promise, so it can be stopped again:
@@ -200,4 +102,26 @@ module.exports = class Configurator{
       return this._server_stop_promise;
    }
 
-}
+
+
+   /**
+    * Retrieves the inner configurator for static resources
+    * @return {StaticConfigurator} The configurator
+    */
+   get static(){
+      // *Returning the inner configurator:
+      return this._static;
+   }
+
+
+
+   /**
+    * Retrieves the inner configurator for dynamic resources
+    * @return {APIConfigurator} The configurator
+    */
+   get api(){
+      // *Returning the inner configurator:
+      return this._api;
+   }
+
+};
