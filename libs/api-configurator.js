@@ -5,18 +5,26 @@ const { METHODS, isMethodSupported } = require('./methods.js');
 
 /**
  * Represents a set of API resources
- * @author Guilherme Reginaldo Ruella
  */
 module.exports = class APIConfigurator{
 
    /**
     * Creates a new API configurator
+    * @param {Configurator} main_configurator The main configurator reference
     */
    constructor(main_configurator){
-      // *Setting the main configurator reference:
+      /**
+       * The main configurator
+       * @private
+       * @type {Configurator}
+       */
       this._main_configurator = main_configurator;
 
-      // *Initializing the options:
+      /**
+       * API resources
+       * @private
+       * @type {Array}
+       */
       this._resources = [];
    }
 
@@ -24,6 +32,8 @@ module.exports = class APIConfigurator{
 
    /**
     * Retrieves the supported HTTP methods enum
+    * @readonly
+    * @static
     */
    static get METHODS(){
       // *Returning the enum:
@@ -38,6 +48,8 @@ module.exports = class APIConfigurator{
     * @param  {string} route                   The server route
     * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {APIConfigurator}                This configurator (for method chaining)
+    * @throws {TypeError}                      The method parameter must be a string
+    * @throws {Error}                          The method parameter must be a supported HTTP method name
     */
    add(method, route, middleware){
       // *Checking if the method is a string, throwing an error if it isn't:
@@ -120,6 +132,7 @@ module.exports = class APIConfigurator{
 
    /**
     * Retrieves the API resources
+    * @readonly
     * @return {Array} An array containing '{ method, route, middleware }' objects
     */
    get resources(){

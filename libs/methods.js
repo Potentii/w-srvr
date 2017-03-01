@@ -1,5 +1,22 @@
-// *Defining the supported HTTP methods enum:
-const METHODS_ENUM = {GET: 'GET', POST: 'POST', PUT: 'PUT', DELETE: 'DELETE'};
+/**
+ * Supported HTTP methods
+ * @readonly
+ * @enum {string}
+ */
+const METHODS_ENUM = {
+   get GET(){
+      return 'GET';
+   },
+   get POST(){
+      return 'POST';
+   },
+   get PUT(){
+      return 'PUT';
+   },
+   get DELETE(){
+      return 'DELETE';
+   }
+};
 
 
 

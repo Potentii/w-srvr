@@ -7,7 +7,6 @@ const boot_server = require('./boot-server.js');
 
 /**
  * Represents a configurable server initializer
- * @author Guilherme Reginaldo Ruella
  */
 module.exports = class Configurator{
 
@@ -15,15 +14,39 @@ module.exports = class Configurator{
     * Creates a new configurator
     */
    constructor(){
-      // *Initializing the server options:
+      /**
+       * The server port
+       * @private
+       * @type {number|string}
+       */
       this._server_port = 80;
 
-      // *Initializing the inner configurators:
+      /**
+       * Inner configurator for static resources
+       * @private
+       * @type {StaticConfigurator}
+       */
       this._static = new StaticConfigurator(this);
+
+      /**
+       * Inner configurator for dynamic resources
+       * @private
+       * @type {APIConfigurator}
+       */
       this._api = new APIConfigurator(this);
 
-      // *Declaring the server promises:
+      /**
+       * The start server task promise
+       * @private
+       * @type {Promise}
+       */
       this._server_start_promise = null;
+
+      /**
+       * The stop server task promise
+       * @private
+       * @type {Promise}
+       */
       this._server_stop_promise = null;
    }
 
@@ -31,6 +54,8 @@ module.exports = class Configurator{
 
    /**
     * Retrieves the supported HTTP methods enum
+    * @readonly
+    * @static
     */
    static get METHODS(){
       // *Returning the enum:
@@ -43,8 +68,13 @@ module.exports = class Configurator{
     * Sets the server port
     * @param  {number|string} port_number The port which the server will run on
     * @return {Configurator}              This configurator (for method chaining)
+    * @throws {TypeError}                 The port must represent a number
     */
    port(port_number){
+      // *Checking if the port number represents a number, throwing an error if it don't:
+      if(isNaN(Number(port_number)))
+         throw new TypeError('The \"port number\" must represent a number');
+
       // *Setting the server port:
       this._server_port = port_number;
       // *Returning this configurator:
@@ -105,7 +135,20 @@ module.exports = class Configurator{
 
 
    /**
+    * Retrieves the set server port
+    * @readonly
+    * @return {number|string} The server port
+    */
+   get server_port(){
+      // *Returning the server port:
+      return this._server_port;
+   }
+
+
+
+   /**
     * Retrieves the inner configurator for static resources
+    * @readonly
     * @return {StaticConfigurator} The configurator
     */
    get static(){
@@ -117,6 +160,7 @@ module.exports = class Configurator{
 
    /**
     * Retrieves the inner configurator for dynamic resources
+    * @readonly
     * @return {APIConfigurator} The configurator
     */
    get api(){

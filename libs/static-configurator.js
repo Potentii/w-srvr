@@ -6,19 +6,33 @@ const path = require('path');
 
 /**
  * Represents a set of static resources
- * @author Guilherme Reginaldo Ruella
  */
 module.exports = class StaticConfigurator{
 
    /**
     * Creates a new static resources configurator
+    * @param {Configurator} main_configurator The main configurator reference
     */
    constructor(main_configurator){
-      // *Setting the main configurator reference:
+      /**
+       * The main configurator
+       * @private
+       * @type {Configurator}
+       */
       this._main_configurator = main_configurator;
 
-      // *Initializing the options:
+      /**
+       * The index page file path
+       * @private
+       * @type {string}
+       */
       this._spa_file = null;
+
+      /**
+       * Static resources
+       * @private
+       * @type {Array}
+       */
       this._resources = [];
    }
 
@@ -28,6 +42,8 @@ module.exports = class StaticConfigurator{
     * Sets the main HTML file
     * @param  {string} file  The relative/absolute file path
     * @return {Configurator} This configurator (for method chaining)
+    * @throws {TypeError}    The file parameter must be a string
+    * @throws {Error}        The file parameter must be a path to a file
     */
    spa(file){
       // *Checking if the file is a string, throwing an error if it isn't:
@@ -58,6 +74,7 @@ module.exports = class StaticConfigurator{
     * @param  {string} route         The server route
     * @param  {string} resource_path The relative/absolute file/directory path
     * @return {Configurator}         This configurator (for method chaining)
+    * @throws {TypeError}            The resource_path parameter must be a string
     */
    add(route, resource_path){
       // *Checking if the resource path is a string, throwing an error if it isn't:
@@ -91,6 +108,7 @@ module.exports = class StaticConfigurator{
 
    /**
     * Retrieves SPA file path
+    * @readonly
     * @return {string} The absolute file path
     */
    get spa_file(){
@@ -101,6 +119,7 @@ module.exports = class StaticConfigurator{
 
    /**
     * Retrieves the static resources
+    * @readonly
     * @return {Array} An array containing '{ route, path }' objects
     */
    get resources(){

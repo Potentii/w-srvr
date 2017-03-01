@@ -11,7 +11,7 @@
     "express"
   ],
   "scripts": {
-    "test": "mocha test/main.js"
+    "test": "mocha test/test.js"
   },
   "main": "main.js",
   "repository": {
