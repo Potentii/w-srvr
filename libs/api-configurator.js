@@ -48,8 +48,8 @@ module.exports = class APIConfigurator{
     * @param  {string} route                   The server route
     * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {APIConfigurator}                This configurator (for method chaining)
-    * @throws {TypeError}                      The method parameter must be a string
-    * @throws {Error}                          The method parameter must be a supported HTTP method name
+    * @throws {TypeError}                      If the method is not a string
+    * @throws {Error}                          If the method is not one of the supported HTTP methods
     */
    add(method, route, middleware){
       // *Checking if the method is a string, throwing an error if it isn't:
@@ -74,6 +74,7 @@ module.exports = class APIConfigurator{
 
    /**
     * Registers a middleware for the given GET route
+    *  Same as add() with the HTTP method set to 'GET'
     * @param  {string} route                   The server route
     * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {APIConfigurator}                This configurator (for method chaining)
@@ -86,6 +87,7 @@ module.exports = class APIConfigurator{
 
    /**
     * Registers a middleware for the given POST route
+    *  Same as add() with the HTTP method set to 'POST'
     * @param  {string} route                   The server route
     * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {APIConfigurator}                This configurator (for method chaining)
@@ -98,6 +100,7 @@ module.exports = class APIConfigurator{
 
    /**
     * Registers a middleware for the given PUT route
+    *  Same as add() with the HTTP method set to 'PUT'
     * @param  {string} route                   The server route
     * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {APIConfigurator}                This configurator (for method chaining)
@@ -110,6 +113,7 @@ module.exports = class APIConfigurator{
 
    /**
     * Registers a middleware for the given DELETE route
+    *  Same as add() with the HTTP method set to 'DELETE'
     * @param  {string} route                   The server route
     * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {APIConfigurator}                This configurator (for method chaining)
@@ -122,7 +126,7 @@ module.exports = class APIConfigurator{
 
    /**
     * Retrieves the main configurator
-    * @return {Configurator}  The main configurator (for method chaining)
+    * @return {Configurator}  The main configurator (for configurator chaining)
     */
    done(){
       return this._main_configurator;

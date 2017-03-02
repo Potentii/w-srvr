@@ -53,7 +53,7 @@ function stop(){
  * @return {Promise}         The server starting promise
  * @author Guilherme Reginaldo Ruella
  */
-function startServer({server_port, spa_file, static_resources, api_resources}){
+function startServer({ server_port, index_file, static_resources, api_resources }){
    // *Returning the starting promise:
    return new Promise((resolve, reject) => {
       // *Requiring the needed modules:
@@ -92,7 +92,7 @@ function startServer({server_port, spa_file, static_resources, api_resources}){
 
 
          // *Getting each dynamic resource:
-         for(let { method, route, middleware } of api_resources){            
+         for(let { method, route, middleware } of api_resources){
             // *Checking the method type:
             switch(method){
             case methods_enum.GET:
@@ -126,14 +126,14 @@ function startServer({server_port, spa_file, static_resources, api_resources}){
          }
 
 
-         // *Checking if the SPA file is set:
-         if(spa_file){
+         // *Checking if the index file is set:
+         if(index_file){
             // *If it is:
-            // *Serving the SPA:
+            // *Serving the index file:
             app.use('/', (req, res, next) => {
                // *Sending the file:
                res.status(200)
-                  .sendFile(spa_file);
+                  .sendFile(index_file);
             });
          }
 

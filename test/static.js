@@ -88,23 +88,23 @@ describe('Static', function(){
    });
 
 
-   describe('SPA', function(){
+   describe('Index page', function(){
 
       it('only allows to set the path as string', function(done){
          // *Defining the test function that fails:
          expect(() => {
-            // *Setting the spa path as an object (not a string):
+            // *Setting the index path as an object (not a string):
             configurator.static
-               .spa(new Object());
+               .index(new Object());
          })
          // *Expecting it to throw an error:
          .to.throw(TypeError, 'The \"file\" must be a string');
 
          // *Defining the test function that succeeds:
          expect(() => {
-            // *Setting the spa path as string:
+            // *Setting the index path as string:
             configurator.static
-               .spa('./abc.html');
+               .index('./abc.html');
          })
          // *Expecting it not to fail:
          .to.not.throw();
@@ -118,17 +118,17 @@ describe('Static', function(){
          // *Defining the test function that fails:
          expect(() => {
             configurator.static
-               // *Setting the spa as a directory path (not a file):
-               .spa('./abc');
+               // *Setting the index as a directory path (not a file):
+               .index('./abc');
          })
          // *Expecting it to throw an error:
          .to.throw(Error, 'The \"file\" must be path to a file');
 
          // *Defining the test function that succeeds:
          expect(() => {
-            // *Setting the spa as a file path:
+            // *Setting the index as a file path:
             configurator.static
-               .spa('./abc.html');
+               .index('./abc.html');
          })
          // *Expecting it not to fail:
          .to.not.throw();
@@ -139,12 +139,12 @@ describe('Static', function(){
 
 
       it('accepts absolute paths', function(done){
-         // *Setting the SPA file path (absolute):
+         // *Setting the index file path (absolute):
          configurator.static
-            .spa(path.join(__dirname, '../abc.html'));
+            .index(path.join(__dirname, '../abc.html'));
 
          // *Expecting it to be correctly assigned:
-         expect(configurator.static.spa_file).to.equal(path.join(__dirname, '../abc.html'));
+         expect(configurator.static.index_file).to.equal(path.join(__dirname, '../abc.html'));
 
          // *Finishing this unit:
          done();
@@ -152,12 +152,12 @@ describe('Static', function(){
 
 
       it('accepts paths relative to the caller', function(done){
-         // *Setting the SPA file path (relative to the caller):
+         // *Setting the index file path (relative to the caller):
          configurator.static
-            .spa('../abc.html');
+            .index('../abc.html');
 
          // *Expecting it to be correctly assigned:
-         expect(configurator.static.spa_file).to.equal(path.join(__dirname, '../abc.html'));
+         expect(configurator.static.index_file).to.equal(path.join(__dirname, '../abc.html'));
 
          // *Finishing this unit:
          done();

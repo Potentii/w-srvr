@@ -26,7 +26,7 @@ module.exports = class StaticConfigurator{
        * @private
        * @type {string}
        */
-      this._spa_file = null;
+      this._index_file = null;
 
       /**
        * Static resources
@@ -42,10 +42,10 @@ module.exports = class StaticConfigurator{
     * Sets the main HTML file
     * @param  {string} file  The relative/absolute file path
     * @return {Configurator} This configurator (for method chaining)
-    * @throws {TypeError}    The file parameter must be a string
-    * @throws {Error}        The file parameter must be a path to a file
+    * @throws {TypeError}    If the file is not a string
+    * @throws {Error}        If the file does not represent a path to a file
     */
-   spa(file){
+   index(file){
       // *Checking if the file is a string, throwing an error if it isn't:
       if(!(typeof file === 'string'))
          throw new TypeError('The \"file\" must be a string');
@@ -62,7 +62,7 @@ module.exports = class StaticConfigurator{
       }
 
       // *Setting the file name:
-      this._spa_file = file;
+      this._index_file = file;
       // *Returning this configurator:
       return this;
    }
@@ -70,11 +70,11 @@ module.exports = class StaticConfigurator{
 
 
    /**
-    * Registers a static directory or file to be served on a given route
+    * Registers a static directory or file to be served on the given route
     * @param  {string} route         The server route
     * @param  {string} resource_path The relative/absolute file/directory path
     * @return {Configurator}         This configurator (for method chaining)
-    * @throws {TypeError}            The resource_path parameter must be a string
+    * @throws {TypeError}            If the resource path is not a string
     */
    add(route, resource_path){
       // *Checking if the resource path is a string, throwing an error if it isn't:
@@ -98,7 +98,7 @@ module.exports = class StaticConfigurator{
 
    /**
     * Retrieves the main configurator
-    * @return {Configurator}  The main configurator (for method chaining)
+    * @return {Configurator}  The main configurator (for configurator chaining)
     */
    done(){
       return this._main_configurator;
@@ -107,12 +107,12 @@ module.exports = class StaticConfigurator{
 
 
    /**
-    * Retrieves SPA file path
+    * Retrieves index file path
     * @readonly
     * @return {string} The absolute file path
     */
-   get spa_file(){
-      return this._spa_file;
+   get index_file(){
+      return this._index_file;
    }
 
 

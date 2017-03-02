@@ -68,13 +68,8 @@ module.exports = class Configurator{
     * Sets the server port
     * @param  {number|string} port_number The port which the server will run on
     * @return {Configurator}              This configurator (for method chaining)
-    * @throws {TypeError}                 The port must represent a number
     */
    port(port_number){
-      // *Checking if the port number represents a number, throwing an error if it don't:
-      if(isNaN(Number(port_number)))
-         throw new TypeError('The \"port number\" must represent a number');
-
       // *Setting the server port:
       this._server_port = port_number;
       // *Returning this configurator:
@@ -94,7 +89,7 @@ module.exports = class Configurator{
       // *Setting the server start promise:
       this._server_start_promise = boot_server.start({
             server_port: this._server_port,
-            spa_file: this._static.spa_file,
+            index_file: this._static.index_file,
             static_resources: this._static.resources,
             api_resources: this._api.resources
          })
