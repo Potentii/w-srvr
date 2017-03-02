@@ -1,6 +1,6 @@
 # APIConfigurator
 
-The `APIConfigurator` class provides methods to handle requests to non static resources. An instance of this configurator can be found with the [`Configurator.prototype.api`](docs/configurator.md#configuratorprototypeapi) property:
+The `APIConfigurator` class provides methods to handle requests to non static resources. An instance of this configurator can be found with the [`Configurator.prototype.api`](configurator.md#configuratorprototypeapi) property:
 
 ```javascript
 let configurator = new Configurator();
@@ -15,7 +15,7 @@ let api_configurator = configurator.api;
 
 ### APIConfigurator.METHODS
 
-_**Note:** see_ [_`Configurator.METHODS`_](docs/configurator.md#configuratormethods)_._
+_**Note:** see_ [_`Configurator.METHODS`_](configurator.md#configuratormethods)_._
 
 ***
 
@@ -49,7 +49,7 @@ Registers a middleware for the given route and HTTP method
 
 #### Returns
 
-_[APIConfigurator](#)_ \- This same configurator (for method chaining)
+[_APIConfigurator_](#) \- This same configurator (for method chaining)
 
 #### Throws
 
@@ -81,7 +81,7 @@ _**Note:** same as [add()](#apiconfiguratorprototypeaddmethod-route-middleware) 
 
 #### Returns
 
-_[APIConfigurator](#)_ \- This same configurator (for method chaining)
+[_APIConfigurator_](#) \- This same configurator (for method chaining)
 
 ***
 
@@ -100,7 +100,7 @@ _**Note:** same as [add()](#apiconfiguratorprototypeaddmethod-route-middleware) 
 
 #### Returns
 
-_[APIConfigurator](#)_ \- This same configurator (for method chaining)
+[_APIConfigurator_](#) \- This same configurator (for method chaining)
 
 ***
 
@@ -119,7 +119,7 @@ _**Note:** same as [add()](#apiconfiguratorprototypeaddmethod-route-middleware) 
 
 #### Returns
 
-_[APIConfigurator](#)_ \- This same configurator (for method chaining)
+[_APIConfigurator_](#) \- This same configurator (for method chaining)
 
 ***
 
@@ -138,7 +138,7 @@ _**Note:** same as [add()](#apiconfiguratorprototypeaddmethod-route-middleware) 
 
 #### Returns
 
-_[APIConfigurator](#)_ \- This same configurator (for method chaining)
+[_APIConfigurator_](#) \- This same configurator (for method chaining)
 
 ***
 
@@ -150,7 +150,7 @@ Retrieves the main configurator
 
 #### Returns
 
-_[Configurator](docs/configurator.md)_ \- The main configurator (for configurator chaining)
+[_Configurator_](configurator.md) \- The main configurator (for configurator chaining)
 
 #### Examples
 

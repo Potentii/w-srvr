@@ -31,15 +31,18 @@ describe('API', function(){
    });
 
 
-   it('stores the resources as a \"{ method, route, middleware }\" object', function(done){
+   it('stores the resources as \"{ method, route, middleware }\" objects', function(done){
       // *Adding resources:
       configurator.api
-         .add('GET', '/abc', ()=>{});
+         .add('GET', '/zzz', ()=>{});
 
       // *Expecting the resources to have the 'method', 'route' and 'middleware' attributes:
-      expect(configurator.api.resources.every(r => {
-         return r.hasOwnProperty('method') && r.hasOwnProperty('route') && r.hasOwnProperty('middleware');
-      })).to.true;
+      expect(configurator.api.resources[0])
+         .to.have.ownProperty('method');
+      expect(configurator.api.resources[0])
+         .to.have.ownProperty('route');
+      expect(configurator.api.resources[0])
+         .to.have.ownProperty('middleware');
 
       // *Finishing this unit:
       done();
@@ -47,20 +50,15 @@ describe('API', function(){
 
 
    it('stores the resources in the same order they were defined', function(done){
-      // *Declaring the control variable:
-      let abc = '';
-
       // *Adding resources:
       configurator.api
          .add('GET', 'a', ()=>{})
          .add('GET', 'b', ()=>{})
          .add('GET', 'c', ()=>{});
 
-      // *Assigning the control variable with the routes strings:
-      configurator.api.resources.forEach(r => abc += r.route);
-
-      // *Expecting the control variable to reveal that the resources were added in the correct order:
-      expect(abc).to.equal('abc');
+      // *Expecting that the resources were added in the correct order:
+      expect(configurator.api.resources.reduce((str, r) => str+r.route, ''))
+         .to.equal('abc');
 
       // *Finishing this unit:
       done();
@@ -72,17 +70,17 @@ describe('API', function(){
       expect(() => {
          // *Adding routes with unsupported HTTP methods (other than GET, POST, PUT or DELETE):
          configurator.api
-            .add('ABC', '/abc', ()=>{});
+            .add('ZZZ', '/zzz', ()=>{});
       })
       // *Expecting it to throw an error:
-      .to.throw(Error, 'The \"ABC\" is not a supported HTTP method');
+      .to.throw(Error, 'The \"ZZZ\" is not a supported HTTP method');
 
       // *Adding routes with supported HTTP methods (GET, POST, PUT or DELETE):
       configurator.api
-         .add('GET', '/abc', ()=>{})
-         .add('POST', '/abc', ()=>{})
-         .add('PUT', '/abc', ()=>{})
-         .add('DELETE', '/abc', ()=>{});
+         .add('GET', '/zzz', ()=>{})
+         .add('POST', '/zzz', ()=>{})
+         .add('PUT', '/zzz', ()=>{})
+         .add('DELETE', '/zzz', ()=>{});
 
       // *Expecting that every route method added is valid:
       expect(configurator.api.resources.every(({ method }) => isMethodSupported(method))).to.true;
@@ -95,10 +93,10 @@ describe('API', function(){
    it('assigns the methods correctly using the \"method name\" functions', function(done){
       // *Adding resources using the shorthand functions:
       configurator.api
-         .get('/abc', ()=>{})
-         .post('/abc', ()=>{})
-         .put('/abc', ()=>{})
-         .delete('/abc', ()=>{});
+         .get('/zzz', ()=>{})
+         .post('/zzz', ()=>{})
+         .put('/zzz', ()=>{})
+         .delete('/zzz', ()=>{});
 
       // *Expecting that the methods were assigned correctly:
       expect(configurator.api.resources[0].method).to.equal('GET');

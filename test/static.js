@@ -37,7 +37,7 @@ describe('Static', function(){
          expect(() => {
             // *Adding resource paths as objects (not strings):
             configurator.static
-               .add('/abc', new Object());
+               .add('/zzz', new Object());
          })
          // *Expecting it to throw an error:
          .to.throw(TypeError, 'The \"resource path\" must be a string');
@@ -46,7 +46,7 @@ describe('Static', function(){
          expect(() => {
             // *Adding resource paths as strings:
             configurator.static
-               .add('/abc', './def');
+               .add('/zzz', './zzz');
          })
          // *Expecting it not to fail:
          .to.not.throw();
@@ -59,12 +59,12 @@ describe('Static', function(){
       it('accepts absolute paths', function(done){
          // *Adding static resources (absolute paths):
          configurator.static
-            .add('/abc', path.join(__dirname, './abc'))
-            .add('/abc', path.join(__dirname, '../abc'));
+            .add('/zzz', path.join(__dirname, './zzz'))
+            .add('/zzz', path.join(__dirname, '../zzz'));
 
          // *Expecting them to be correctly assigned:
-         expect(configurator.static.resources[0].path).to.equal(path.join(__dirname, './abc'));
-         expect(configurator.static.resources[1].path).to.equal(path.join(__dirname, '../abc'));
+         expect(configurator.static.resources[0].path).to.equal(path.join(__dirname, './zzz'));
+         expect(configurator.static.resources[1].path).to.equal(path.join(__dirname, '../zzz'));
 
          // *Finishing this unit:
          done();
@@ -74,12 +74,44 @@ describe('Static', function(){
       it('accepts paths relative to the caller', function(done){
          // *Adding static resources (relative paths):
          configurator.static
-            .add('/abc', './abc')
-            .add('/abc', '../abc');
+            .add('/zzz', './zzz')
+            .add('/zzz', '../zzz');
 
          // *Expecting them to be correctly assigned:
-         expect(configurator.static.resources[0].path).to.equal(path.join(__dirname, './abc'));
-         expect(configurator.static.resources[1].path).to.equal(path.join(__dirname, '../abc'));
+         expect(configurator.static.resources[0].path).to.equal(path.join(__dirname, './zzz'));
+         expect(configurator.static.resources[1].path).to.equal(path.join(__dirname, '../zzz'));
+
+         // *Finishing this unit:
+         done();
+      });
+
+
+      it('stores the resources as \"{ route, path }\" objects', function(done){
+         // *Adding static resources:
+         configurator.static
+            .add('/zzz', './zzz');
+
+         // *Expecting the resources to have the 'route' and 'path' attributes:
+         expect(configurator.static.resources[0])
+            .to.have.ownProperty('route');
+         expect(configurator.static.resources[0])
+            .to.have.ownProperty('path');
+
+         // *Finishing this unit:
+         done();
+      });
+
+
+      it('stores the resources in the same order they were defined', function(done){
+         // *Adding resources:
+         configurator.static
+            .add('a', './zzz')
+            .add('b', './zzz')
+            .add('c', './zzz');
+
+         // *Expecting that the resources were added in the correct order:
+         expect(configurator.static.resources.reduce((str, r) => str+r.route, ''))
+            .to.equal('abc');
 
          // *Finishing this unit:
          done();
@@ -104,7 +136,7 @@ describe('Static', function(){
          expect(() => {
             // *Setting the index path as string:
             configurator.static
-               .index('./abc.html');
+               .index('./zzz.html');
          })
          // *Expecting it not to fail:
          .to.not.throw();
@@ -119,7 +151,7 @@ describe('Static', function(){
          expect(() => {
             configurator.static
                // *Setting the index as a directory path (not a file):
-               .index('./abc');
+               .index('./zzz');
          })
          // *Expecting it to throw an error:
          .to.throw(Error, 'The \"file\" must be path to a file');
@@ -128,7 +160,7 @@ describe('Static', function(){
          expect(() => {
             // *Setting the index as a file path:
             configurator.static
-               .index('./abc.html');
+               .index('./zzz.html');
          })
          // *Expecting it not to fail:
          .to.not.throw();
@@ -141,10 +173,10 @@ describe('Static', function(){
       it('accepts absolute paths', function(done){
          // *Setting the index file path (absolute):
          configurator.static
-            .index(path.join(__dirname, '../abc.html'));
+            .index(path.join(__dirname, '../zzz.html'));
 
          // *Expecting it to be correctly assigned:
-         expect(configurator.static.index_file).to.equal(path.join(__dirname, '../abc.html'));
+         expect(configurator.static.index_file).to.equal(path.join(__dirname, '../zzz.html'));
 
          // *Finishing this unit:
          done();
@@ -154,10 +186,10 @@ describe('Static', function(){
       it('accepts paths relative to the caller', function(done){
          // *Setting the index file path (relative to the caller):
          configurator.static
-            .index('../abc.html');
+            .index('../zzz.html');
 
          // *Expecting it to be correctly assigned:
-         expect(configurator.static.index_file).to.equal(path.join(__dirname, '../abc.html'));
+         expect(configurator.static.index_file).to.equal(path.join(__dirname, '../zzz.html'));
 
          // *Finishing this unit:
          done();

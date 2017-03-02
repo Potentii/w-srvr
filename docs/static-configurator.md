@@ -1,6 +1,6 @@
 # StaticConfigurator
 
-The `StaticConfigurator` class provides methods to register static resources in the server as well as an index page. An instance of this configurator can be found with the [`Configurator.prototype.static`](docs/configurator.md#configuratorprototypestatic) property:
+The `StaticConfigurator` class provides methods to register static resources in the server as well as an index page. An instance of this configurator can be found with the [`Configurator.prototype.static`](configurator.md#configuratorprototypestatic) property:
 
 ```javascript
 let configurator = new Configurator();
@@ -49,7 +49,7 @@ _**Note:** The given file will be served in the root route (<http://localhost/>)
 
 #### Returns
 
-_[StaticConfigurator](#)_ \- This same configurator (for method chaining)
+[_StaticConfigurator_](#) \- This same configurator (for method chaining)
 
 #### Throws
 
@@ -78,7 +78,7 @@ Registers a static directory or file to be served on the given route
 
 #### Returns
 
-_[StaticConfigurator](#)_ \- This same configurator (for method chaining)
+[_StaticConfigurator_](#) \- This same configurator (for method chaining)
 
 #### Throws
 
@@ -103,7 +103,7 @@ Retrieves the main configurator
 
 #### Returns
 
-_[Configurator](docs/configurator.md)_ \- The main configurator (for configurator chaining)
+[_Configurator_](configurator.md) \- The main configurator (for configurator chaining)
 
 #### Examples
 

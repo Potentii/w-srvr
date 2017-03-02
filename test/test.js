@@ -3,3 +3,4 @@ require('./general.js');
 require('./static.js');
 require('./methods.js');
 require('./api.js');
+require('./boot.js');

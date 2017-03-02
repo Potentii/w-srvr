@@ -41,7 +41,7 @@ _**Note:** readonly, use the_ [_`port()`_](#configuratorprototypeportport_number
 
 ### Configurator.prototype.static
 
-_[StaticConfigurator](docs/static-configurator.md)_ \- The inner configurator for static resources
+[_StaticConfigurator_](static-configurator.md) \- The inner configurator for static resources
 
 ***
 
@@ -49,7 +49,7 @@ _[StaticConfigurator](docs/static-configurator.md)_ \- The inner configurator fo
 
 ### Configurator.prototype.api
 
-_[APIConfigurator](docs/api-configurator.md)_ \- The inner configurator for API routes
+[_APIConfigurator_](api-configurator.md) \- The inner configurator for API routes
 
 ***
 
@@ -69,7 +69,7 @@ _**Note:** by default, the initial server port is `80`._
 
 #### Returns
 
-_[Configurator](#)_ \- This same configurator (for method chaining)
+[_Configurator_](#) \- This same configurator (for method chaining)
 
 #### Examples
 
@@ -80,3 +80,43 @@ configurator.port(3000);                 // Will set the port to 3000
 configurator.port('8080');               // Will set the port to '8080'
 configurator.port(process.env.PORT);     // Will use the PORT environment variable
 ```
+
+***
+
+<br>
+
+### Configurator.prototype.start()
+
+Starts the server instance.
+
+_**Note:** It will apply the settings and start the server, so it should be called after the configurations have been done._
+
+#### Returns
+
+[_Promise_](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) \- The promise resolves into an `{ server, address }` object, or it rejects with a `Error` if the server could not be started
+- `server` [_http.Server_](https://nodejs.org/api/http.html#http_class_http_server) \- The started HTTP server
+- `address` [_URL_](https://nodejs.org/api/url.html#url_url) \- The server address information
+
+#### Examples
+
+```javascript
+configurator
+   .port(3000)
+   .start()    // It will commit all settings and start the server
+   .then(info => console.log('Server started at ' + info.address.href))
+   .catch(err => console.error(err));
+```
+
+***
+
+<br>
+
+### Configurator.prototype.stop()
+
+Stops the current server instance.
+
+_**Note:** It will end all connections remaining in the current server, and release the listened port._
+
+#### Returns
+
+[_Promise_](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) \- The promise resolves if everything goes ok, or it rejects with a `Error` if the server could not be stopped

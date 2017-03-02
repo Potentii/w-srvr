@@ -19,7 +19,8 @@ const sockets = {};
  */
 function start(settings){
    // *Checking if the settings wasn't set, and if didn't, rejecting the promise:
-   if(!settings) return Promise.reject(new Error('Missing w-srvr boot settings'));
+   if(!settings)
+      return Promise.reject(new Error('Missing w-srvr settings'));
 
    // *Starting the web server:
    return startServer(settings)
@@ -58,7 +59,7 @@ function startServer({ server_port, index_file, static_resources, api_resources 
    return new Promise((resolve, reject) => {
       // *Requiring the needed modules:
       const url = require('url');
-      const methods_enum = require('./methods.js');
+      const { METHODS } = require('./methods.js');
       // *Preparing the Expressjs instance:
       const express = require('express');
       const app = express();
@@ -95,22 +96,22 @@ function startServer({ server_port, index_file, static_resources, api_resources 
          for(let { method, route, middleware } of api_resources){
             // *Checking the method type:
             switch(method){
-            case methods_enum.GET:
+            case METHODS.GET:
                // *If it is GET:
                // *Serving as GET:
                app.get(route, middleware);
                break;
-            case methods_enum.POST:
+            case METHODS.POST:
                // *If it is POST:
                // *Serving as POST:
                app.post(route, middleware);
                break;
-            case methods_enum.PUT:
+            case METHODS.PUT:
                // *If it is PUT:
                // *Serving as PUT:
                app.put(route, middleware);
                break;
-            case methods_enum.DELETE:
+            case METHODS.DELETE:
                // *If it is DELETE:
                // *Serving as DELETE:
                app.delete(route, middleware);
@@ -147,9 +148,10 @@ function startServer({ server_port, index_file, static_resources, api_resources 
 
 
          // *Setting up the server port:
-         app.locals.port = server_port || process.env.PORT;
+         app.locals.port = server_port;
          // *Checking if the port could be set, and if it couldn't, throwing an error:
-         if(!app.locals.port) throw new Error('The server port must be set');
+         if(!app.locals.port)
+            throw new Error('The server port must be set');
 
 
          // *Starting up the server:
@@ -175,7 +177,7 @@ function startServer({ server_port, index_file, static_resources, api_resources 
             let address = server.address();
 
             // *Resolving the promise:
-            resolve({address: url.parse(`http://${address.address==='::'?'localhost':address.address}:${address.port}/`)});
+            resolve({ server, address: url.parse(`http://${address.address==='::'?'localhost':address.address}:${address.port}/`) });
          }).on('error', err => {
             // *Rejecting the promise:
             reject(err);
