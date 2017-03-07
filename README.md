@@ -15,6 +15,7 @@ It makes the process of setting up a web server less verbose, by wrapping an `Ex
 - [Other examples](#other-examples)
  - [Website](#website)
  - [Web service](#web-service)
+ - [Body parsing](#body-parsing)
 - [Testing](#testing)
 - [Feedback](#feedback)
 - [License](#license)
@@ -47,14 +48,14 @@ server
 
    // *Configuring the API:
    .api
-      .get('/api/users', (req, res, next) => {})
-      .get('/api/users/:id', (req, res, next) => {})
-      .post('/api/users', (req, res, next) => {})
+      .get('/api/users',     (req, res, next) => res.end())
+      .get('/api/users/:id', (req, res, next) => res.end())
+      .post('/api/users',    (req, res, next) => res.end())
       .done()
 
    // *Configuring the static resources:
    .static
-      .add('/static/js', '../src/js')
+      .add('/static/js',  '../src/js')
       .add('/static/css', '../src/css')
       .index('../src/index.html')
       .done()
@@ -108,6 +109,12 @@ server
    // *Logging errors:
    .catch(err => console.error(err));
 ```
+
+_**See:**_
+
+- [_StaticConfigurator_](docs/static-configurator.md)
+- [*StaticConfigurator.prototype.add(route, resource\_path)*](docs/static-configurator.md#staticconfiguratorprototypeaddroute-resource_path)
+- [_StaticConfigurator.prototype.index(file)_](docs/static-configurator.md#staticconfiguratorprototypeindexfile)
 
 ***
 
@@ -177,6 +184,43 @@ server
    // *Logging errors:
    .catch(err => console.error(err));
 ```
+
+_**See:**_
+
+- [_APIConfigurator_](docs/api-configurator.md)
+- [_APIConfigurator.prototype.add(method, route, middleware)_](docs/api-configurator.md#apiconfiguratorprototypeaddmethod-route-middleware)
+- [_APIConfigurator.prototype.get(route, middleware)_](docs/api-configurator.md#apiconfiguratorprototypegetroute-middleware)
+- [_APIConfigurator.prototype.post(route, middleware)_](docs/api-configurator.md#apiconfiguratorprototypepostroute-middleware)
+- [_APIConfigurator.prototype.put(route, middleware)_](docs/api-configurator.md#apiconfiguratorprototypeputroute-middleware)
+- [_APIConfigurator.prototype.delete(route, middleware)_](docs/api-configurator.md#apiconfiguratorprototypedeleteroute-middleware)
+
+***
+
+<br>
+
+### Body parsing
+
+The advanced configurator can also enable request body parsing:
+
+```javascript
+server.api
+   .post(...)
+      .advanced
+      .parseJSON({limit: '400kb'})
+      .parseURLEncoded()
+      .done()
+   .get(...)
+```
+
+_**See:**_
+
+- [_body-parser_](https://github.com/expressjs/body-parser)
+- [_AdvancedAPIConfigurator.prototype.parseJSON(options)_](docs/advanced-api-configurator.md#advancedapiconfiguratorprototypeparsejsonoptions)
+- [_AdvancedAPIConfigurator.prototype.parseText(options)_](docs/advanced-api-configurator.md#advancedapiconfiguratorprototypeparsetextoptions)
+- [_AdvancedAPIConfigurator.prototype.parseRaw(options)_](docs/advanced-api-configurator.md#advancedapiconfiguratorprototypeparserawoptions)
+- [_AdvancedAPIConfigurator.prototype.parseURLEncoded(options)_](docs/advanced-api-configurator.md#advancedapiconfiguratorprototypeparseurlencodedoptions)
+
+***
 
 <br><br>
 

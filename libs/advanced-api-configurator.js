@@ -141,6 +141,12 @@ module.exports = class AdvancedAPIConfigurator{
 
 
 
+   /**
+    * Enables the JSON request body parsing
+    * @param  {object} [options]        The body-parser options object
+    * @return {AdvancedAPIConfigurator} This configurator (for method chaining)
+    * @see {@link https://github.com/expressjs/body-parser#bodyparserjsonoptions}
+    */
    parseJSON(options){
       // *Setting the parser options:
       this._parsers.set(PARSERS.JSON, options);
@@ -148,6 +154,14 @@ module.exports = class AdvancedAPIConfigurator{
       return this;
    }
 
+
+
+   /**
+    * Enables the text request body parsing
+    * @param  {object} [options]        The body-parser options object
+    * @return {AdvancedAPIConfigurator} This configurator (for method chaining)
+    * @see {@link https://github.com/expressjs/body-parser#bodyparsertextoptions}
+    */
    parseText(options){
       // *Setting the parser options:
       this._parsers.set(PARSERS.TEXT, options);
@@ -155,6 +169,14 @@ module.exports = class AdvancedAPIConfigurator{
       return this;
    }
 
+
+
+   /**
+    * Enables the raw (buffer) request body parsing
+    * @param  {object} [options]        The body-parser options object
+    * @return {AdvancedAPIConfigurator} This configurator (for method chaining)
+    * @see {@link https://github.com/expressjs/body-parser#bodyparserrawoptions}
+    */
    parseRaw(options){
       // *Setting the parser options:
       this._parsers.set(PARSERS.RAW, options);
@@ -162,6 +184,14 @@ module.exports = class AdvancedAPIConfigurator{
       return this;
    }
 
+
+
+   /**
+    * Enables the url-encoded request body parsing
+    * @param  {object} [options]        The body-parser options object
+    * @return {AdvancedAPIConfigurator} This configurator (for method chaining)
+    * @see {@link https://github.com/expressjs/body-parser#bodyparserurlencodedoptions}
+    */
    parseURLEncoded(options){
       // *Setting the parser options:
       this._parsers.set(PARSERS.URLENCODED, options);

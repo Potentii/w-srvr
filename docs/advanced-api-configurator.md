@@ -27,6 +27,24 @@ _**Note:** readonly, use the_ [_`header()`_](#advancedapiconfiguratorprototypehe
 
 ***
 
+<br>
+
+### AdvancedAPIConfigurator.prototype.parsers
+
+_Array<{ type, options }>_ \- An array containing all the registered body parsers
+
+- `type` _string_ \- The type of the parser (`json`, `text`, `raw`, or `urlencoded`)
+- `options` _object_ \- The options object
+
+_**Note:** readonly, use the following methods to configure body parsers:_
+
+- [_AdvancedAPIConfigurator.prototype.parseJSON(options)_](#advancedapiconfiguratorprototypeparsejsonoptions)
+- [_AdvancedAPIConfigurator.prototype.parseText(options)_](#advancedapiconfiguratorprototypeparsetextoptions)
+- [_AdvancedAPIConfigurator.prototype.parseRaw(options)_](#advancedapiconfiguratorprototypeparserawoptions)
+- [_AdvancedAPIConfigurator.prototype.parseURLEncoded(options)_](#advancedapiconfiguratorprototypeparseurlencodedoptions)
+
+***
+
 <br><br>
 
 ## Methods
@@ -252,6 +270,78 @@ _**See:**_ [_Content-Type (MDN)_](https://developer.mozilla.org/en-US/docs/Web/H
    .advanced
    .responseType('application/json');
 ```
+
+***
+
+<br>
+
+### AdvancedAPIConfigurator.prototype.parseJSON(options)
+
+Enables the JSON request body parsing
+
+_**See:**_ [_JSON parse options_](https://github.com/expressjs/body-parser#bodyparserjsonoptions)_._
+
+#### Parameters
+
+- `options` _object_ \- The body-parser options object
+
+#### Returns
+
+[AdvancedAPIConfigurator](#) \- This same configurator (for method chaining)
+
+***
+
+<br>
+
+### AdvancedAPIConfigurator.prototype.parseText(options)
+
+Enables the text request body parsing
+
+_**See:**_ [_text parse options_](https://github.com/expressjs/body-parser#bodyparsertextoptions)_._
+
+#### Parameters
+
+- `options` _object_ \- The body-parser options object
+
+#### Returns
+
+[AdvancedAPIConfigurator](#) \- This same configurator (for method chaining)
+
+***
+
+<br>
+
+### AdvancedAPIConfigurator.prototype.parseRaw(options)
+
+Enables the raw (buffer) request body parsing
+
+_**See:**_ [_raw parse options_](https://github.com/expressjs/body-parser#bodyparserrawoptions)_._
+
+#### Parameters
+
+- `options` _object_ \- The body-parser options object
+
+#### Returns
+
+[AdvancedAPIConfigurator](#) \- This same configurator (for method chaining)
+
+***
+
+<br>
+
+### AdvancedAPIConfigurator.prototype.parseURLEncoded(options)
+
+Enables the url-encoded request body parsing
+
+_**See:**_ [_url-encoded parse options_](https://github.com/expressjs/body-parser#bodyparserurlencodedoptions)_._
+
+#### Parameters
+
+- `options` _object_ \- The body-parser options object
+
+#### Returns
+
+[AdvancedAPIConfigurator](#) \- This same configurator (for method chaining)
 
 ***
 
