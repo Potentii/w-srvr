@@ -15,6 +15,15 @@ const METHODS_ENUM = {
    },
    get DELETE(){
       return 'DELETE';
+   },
+   get HEAD(){
+      return 'HEAD';
+   },
+   get PATCH(){
+      return 'PATCH';
+   },
+   get OPTIONS(){
+      return 'OPTIONS';
    }
 };
 

@@ -6,21 +6,23 @@ Represents an API resource.
 
 ## Constructors
 
-### APIResource.prototype.constructor(method, route, middleware, advanced)
+### APIResource.prototype.constructor(methods, route, middleware, advanced)
 
 Creates a new API resource
 
+_**See:**_ [_supported HTTP methods_](configurator.md#configuratormethods)
+
 #### Parameters
 
-- `method` _string_ \- A supported HTTP method
+- `methods` _string|string[]_ \- One or more supported HTTP methods
 - `route` _string_ \- The server route
 - `middleware` _function|function[]_ \- A valid Expressjs middleware function
 - `advanced` [_AdvancedAPIConfigurator_](advanced-api-configurator.md) \- The advanced settings configurator
 
 #### Throws
 
-- _TypeError_ \- If the method is not a string
-- _Error_ \- If the method is not one of the supported HTTP methods
+- _TypeError_ \- If methods is not a string or an array of strings
+- _Error_ \- If some HTTP method is not supported
 - _TypeError_ \- If the advanced configurator is not the correct type
 
 ***
@@ -29,9 +31,9 @@ Creates a new API resource
 
 ## Properties
 
-### APIResource.prototype.method
+### APIResource.prototype.methods
 
-_string_ \- The HTTP method
+_string[]_ \- The list of HTTP methods
 
 _**Note:** readonly._
 

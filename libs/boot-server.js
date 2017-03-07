@@ -71,11 +71,8 @@ function startServer({ server_port, index_file, static_resources, api_resources 
       // *Trying to configure the server:
       try{
 
-         // *Enabling JSON parsing and set the maximum body size:
-         //app.use(body_parser.json({limit: '1mb'}));
-
          // *Getting each dynamic resource:
-         for(let { method, route, middleware, advanced } of api_resources){
+         for(let { methods, route, middleware, advanced } of api_resources){
 
             // *Declaring the middlewares list:
             const middlewares = [];
@@ -157,39 +154,59 @@ function startServer({ server_port, index_file, static_resources, api_resources 
             }
 
             // *Checking if the 'middleware' is actually an array:
-            if(Array.isArray(middleware)){
-               // *If it is:
-               // *Adding its items individualy in the list:
-               middlewares.push(...middleware);
-            } else{
-               // *If it isn't:
-               // *Adding it in the list:
-               middlewares.push(middleware);
+            if(middleware){
+               if(Array.isArray(middleware)){
+                  // *If it is:
+                  // *Adding its items individualy in the list:
+                  middlewares.push(...middleware);
+               } else{
+                  // *If it isn't:
+                  // *Adding it in the list:
+                  middlewares.push(middleware);
+               }
             }
 
-            // *Checking the method type:
-            switch(method){
-            case METHODS.GET:
-               // *If it is GET:
-               // *Serving as GET:
-               app.get(route, middlewares);
-               break;
-            case METHODS.POST:
-               // *If it is POST:
-               // *Serving as POST:
-               app.post(route, middlewares);
-               break;
-            case METHODS.PUT:
-               // *If it is PUT:
-               // *Serving as PUT:
-               app.put(route, middlewares);
-               break;
-            case METHODS.DELETE:
-               // *If it is DELETE:
-               // *Serving as DELETE:
-               app.delete(route, middlewares);
-               break;
-            }
+            // *Getting each method:
+            methods.forEach(method => {
+               // *Checking the method type:
+               switch(method){
+               case METHODS.GET:
+                  // *If it is GET:
+                  // *Serving as GET:
+                  app.get(route, middlewares);
+                  break;
+               case METHODS.POST:
+                  // *If it is POST:
+                  // *Serving as POST:
+                  app.post(route, middlewares);
+                  break;
+               case METHODS.PUT:
+                  // *If it is PUT:
+                  // *Serving as PUT:
+                  app.put(route, middlewares);
+                  break;
+               case METHODS.DELETE:
+                  // *If it is DELETE:
+                  // *Serving as DELETE:
+                  app.delete(route, middlewares);
+                  break;
+               case METHODS.HEAD:
+                  // *If it is HEAD:
+                  // *Serving as HEAD:
+                  app.head(route, middlewares);
+                  break;
+               case METHODS.PATCH:
+                  // *If it is PATCH:
+                  // *Serving as PATCH:
+                  app.patch(route, middlewares);
+                  break;
+               case METHODS.OPTIONS:
+                  // *If it is OPTIONS:
+                  // *Serving as OPTIONS:
+                  app.options(route, middlewares);
+                  break;
+               }
+            });
 
          }
 

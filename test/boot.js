@@ -46,11 +46,11 @@ describe('Boot', function(){
       // *Adding resources:
       configurator
          .start()
-         .then(info => {
+         .then(output => {
             // *Expecting the resolved object to have the 'server' and 'address' attributes:
-            expect(info)
+            expect(output)
                .to.have.ownProperty('server');
-            expect(info)
+            expect(output)
                .to.have.ownProperty('address');
 
             // *Finishing this unit:

@@ -92,17 +92,18 @@ module.exports = class APIConfigurator{
 
 
    /**
-    * Registers a middleware for the given route and HTTP method
-    * @param  {string} method                  A supported HTTP method (GET, POST, PUT, DELETE)
+    * Registers a middleware for the given route and HTTP methods
+    * @param  {string|string[]} methods        One or more supported HTTP methods
     * @param  {string} route                   The server route
     * @param  {function|function[]} middleware A valid Expressjs middleware function
     * @return {APIConfigurator}                This configurator (for method chaining)
-    * @throws {TypeError}                      If the method is not a string
-    * @throws {Error}                          If the method is not one of the supported HTTP methods
+    * @throws {TypeError}                      If methods is not a string or an array of strings
+    * @throws {Error}                          If some HTTP method is not supported
+    * @see {@link Configurator.METHODS}        For a list of supported HTTP methods
     */
-   add(method, route, middleware){
+   add(methods, route, middleware){
       // *Adding this resource into the array:
-      this._resources.push(new APIResource(method, route, middleware, null));
+      this._resources.push(new APIResource(methods, route, middleware, null));
 
       // *Changing the chain flag status:
       this._isInRouteChain = true;
@@ -161,6 +162,91 @@ module.exports = class APIConfigurator{
     */
    delete(route, middleware){
       return this.add(APIConfigurator.METHODS.DELETE, route, middleware);
+   }
+
+
+
+   /**
+    * Registers a middleware for the given HEAD route
+    *  Same as add() with the HTTP method set to 'HEAD'
+    * @param  {string} route                   The server route
+    * @param  {function|function[]} middleware A valid Expressjs middleware function
+    * @return {APIConfigurator}                This configurator (for method chaining)
+    */
+   head(route, middleware){
+      return this.add(APIConfigurator.METHODS.HEAD, route, middleware);
+   }
+
+
+
+   /**
+    * Registers a middleware for the given PATCH route
+    *  Same as add() with the HTTP method set to 'PATCH'
+    * @param  {string} route                   The server route
+    * @param  {function|function[]} middleware A valid Expressjs middleware function
+    * @return {APIConfigurator}                This configurator (for method chaining)
+    */
+   patch(route, middleware){
+      return this.add(APIConfigurator.METHODS.PATCH, route, middleware);
+   }
+
+
+
+   /**
+    * Registers a middleware for the given OPTIONS route
+    *  Same as add() with the HTTP method set to 'OPTIONS'
+    * @param  {string} route                   The server route
+    * @param  {function|function[]} middleware A valid Expressjs middleware function
+    * @return {APIConfigurator}                This configurator (for method chaining)
+    */
+   options(route, middleware){
+      return this.add(APIConfigurator.METHODS.OPTIONS, route, middleware);
+   }
+
+
+
+   /**
+    * Registers a middleware for all supported HTTP methods
+    *  Same as add() with all the supported HTTP methods
+    *  This method is not equivalent to the Expressjs's app.all()
+    * @param  {string} route                   The server route
+    * @param  {function|function[]} middleware A valid Expressjs middleware function
+    * @return {APIConfigurator}                This configurator (for method chaining)
+    * @see {@link Configurator.METHODS}        For a list of supported HTTP methods
+    */
+   all(route, middleware){
+      // *Initializing the methods list:
+      let methods = [];
+
+      // *Adding all the supported methods in the list:
+      for(let method_name in APIConfigurator.METHODS){
+         if(APIConfigurator.METHODS.hasOwnProperty(method_name)){
+            methods.push(APIConfigurator.METHODS[method_name])
+         }
+      }
+
+      return this.add(methods, route, middleware);
+   }
+
+
+
+   /**
+    * Registers a middleware for GET, POST, PUT, DELETE, HEAD and PATCH routes
+    *  Same as add() with the HTTP method set to 'GET', 'POST', 'PUT', 'DELETE', 'HEAD' and 'PATCH'
+    *  This method is not equivalent to the Expressjs's app.all()
+    * @param  {string} route                   The server route
+    * @param  {function|function[]} middleware A valid Expressjs middleware function
+    * @return {APIConfigurator}                This configurator (for method chaining)
+    */
+   most(route, middleware){
+      return this.add([
+         APIConfigurator.METHODS.GET,
+         APIConfigurator.METHODS.POST,
+         APIConfigurator.METHODS.PUT,
+         APIConfigurator.METHODS.DELETE,
+         APIConfigurator.METHODS.HEAD,
+         APIConfigurator.METHODS.PATCH,
+      ], route, middleware);
    }
 
 

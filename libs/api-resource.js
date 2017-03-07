@@ -11,28 +11,33 @@ module.exports = class APIResource{
 
    /**
     * Creates a new API resource
-    * @param  {string} method                    A supported HTTP method (GET, POST, PUT, DELETE)
+    * @param  {string|string[]} methods          One or more supported HTTP methods
     * @param  {string} route                     The server route
     * @param  {function|function[]} middleware   A valid Expressjs middleware function
     * @param  {AdvancedAPIConfigurator} advanced The advanced settings configurator
-    * @throws {TypeError}                        If the method is not a string
-    * @throws {Error}                            If the method is not one of the supported HTTP methods
+    * @throws {TypeError}                        If methods is not a string or an array of strings
+    * @throws {Error}                            If some HTTP method is not supported
     * @throws {TypeError}                        If the advanced configurator is not the correct type
+    * @see {@link Configurator.METHODS}          For a list of supported HTTP methods
     */
-   constructor(method, route, middleware, advanced){
-      // *Checking if the method is a string, throwing an error if it isn't:
-      if(!(typeof method === 'string'))
-         throw new TypeError('The \"method\" must be a string');
+   constructor(methods, route, middleware, advanced){
+      // *Splitting 'methods' if it is a string:
+      if(typeof methods === 'string')
+         methods = methods.split(',');
 
-      // *Making the method name uppercase:
-      method = method.toUpperCase();
+      // *Checking if 'methods' is an array of strings, throwing an error if it's not:
+      if(!Array.isArray(methods) || !methods.every(m => typeof m === 'string'))
+         throw new TypeError('The \"methods\" must be a string, or an array of strings');
 
-      // *Checking if the given method is supported, and if it's not, throwing an error:
-      if(!isMethodSupported(method))
-         throw new Error('The \"' + method +'\" is not a supported HTTP method');
+      // *Making the methods names uppercase:
+      methods = methods.map(m => m.toUpperCase());
+
+      // *Checking if all methods are supported, and if some isn't, throwing an error:
+      if(methods.some(m => !isMethodSupported(m)))
+         throw new Error('Some of the following HTTP methods: \"[' + methods.join(', ') + ']\" are not supported');
 
       // *Setting this object's attributes:
-      this._method = method;
+      this._methods = methods;
       this._route = route;
       this._middleware = middleware;
       this.advanced = advanced;
@@ -41,12 +46,12 @@ module.exports = class APIResource{
 
 
    /**
-    * The HTTP method
+    * The list of HTTP methods
     * @readonly
-    * @type {string}
+    * @type {string[]}
     */
-   get method(){
-      return this._method;
+   get methods(){
+      return this._methods.concat([]);
    }
 
 

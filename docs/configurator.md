@@ -12,11 +12,11 @@ const server = new Configurator();
 
 ### Configurator.METHODS
 
-_object_ \- A static enum of strings that has all the supported HTTP methods names, which are `GET`, `POST`, `PUT` and `DELETE`
+_object_ \- A static enum of strings that has all the supported HTTP methods names, which are `GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `PATCH` and `OPTIONS`
 
 #### Examples
 
-You can use it in conjunction with the api configurator to add a route middleware:
+You can use it with the API configurator to add a route middleware:
 
 ```javascript
 server.api
@@ -91,9 +91,23 @@ Starts the server instance.
 
 _**Note:** It will apply the settings and start the server, so it should be called after the configurations have been done._
 
+_**Note:** These are the actions done in order to start the web server:_
+
+- For each API resource:
+ - Set parsers
+ - Set preflight headers (in an `OPTIONS` middleware)
+ - Set other headers
+ - Set the middlewares
+
+- For each static resource:
+ - Set a static `GET` middleware
+
+- Set the index page on the root route (`/`)
+- Set an auto `404` response middleware
+
 #### Returns
 
-[_Promise_](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) \- The promise resolves into an `{ server, address }` object, or it rejects with a `Error` if the server could not be started
+[_Promise_](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)_<{ server, address }>_ \- The promise resolves into an `{ server, address }` object, or it rejects with a `Error` if the server could not be started:
 - `server` [_http.Server_](https://nodejs.org/api/http.html#http_class_http_server) \- The started HTTP server
 - `address` [_URL_](https://nodejs.org/api/url.html#url_url) \- The server address information
 
@@ -103,7 +117,7 @@ _**Note:** It will apply the settings and start the server, so it should be call
 server
    .port(3000)
    .start()    // It will commit all settings and start the server
-   .then(info => console.log('Server started at ' + info.address.href))
+   .then(output => console.log('Server started at ' + output.address.href))
    .catch(err => console.error(err));
 ```
 
@@ -115,7 +129,7 @@ server
 
 Stops the current server instance.
 
-_**Note:** It will end all connections remaining in the current server, and release the listened port._
+_**Note:** It will end all connection sockets remaining in the current server, and release the listened port._
 
 #### Returns
 
