@@ -266,6 +266,51 @@ describe('Boot', function(){
             });
       });
 
+
+      it('applies the parsers settings correctly', function(done){
+         // *Defining the body to be parsed:
+         const BODY_JSON = JSON.stringify({ping: 'pong'});
+
+         // *Adding resources:
+         configurator.api
+            .post('/echo', (req, res, next) => res.send(req.body).end())
+               .advanced
+               .parseJSON()
+               .done()
+            .post('/not-echo', (req, res, next) => res.send(req.body).end())
+            .done()
+
+            // *Starting the server:
+            .start()
+            .then(({ address }) => {
+               // *Returning a promise chain that tests in parallel:
+               return Promise.all([
+
+                  // *Testing if the body could be parsed and sent as response:
+                  requestAsPromise(Configurator.METHODS.POST, address.href + 'echo', {'Content-Type':'application/json; charset=utf-8'}, BODY_JSON)
+                     .then(res => {
+                        expect(res.body.toString()).to.equal(BODY_JSON);
+                     }),
+
+                  // *Testing if the body could not be parsed and sent as response:
+                  requestAsPromise(Configurator.METHODS.POST, address.href + 'not-echo', {'Content-Type':'application/json; charset=utf-8'}, BODY_JSON)
+                     .then(res => {
+                        expect(res.body.toString()).to.equal('');
+                     })
+
+                  ])
+                  .then(() => {
+                     // *Finishing this unit:
+                     done();
+                  });
+
+            })
+            .catch(err => {
+               // *Finishing this unit with an error:
+               done(err);
+            });
+      });
+
    });
 
 });
@@ -274,15 +319,17 @@ describe('Boot', function(){
 
 /**
  * Wraps a simple HTTP request in a promise
- * @param  {string} method The HTTP method
- * @param  {string} url    The server URL
- * @return {Promise}       A promise that resolves into a { response, body } object, or rejects if some error occurs
+ * @param  {string} method  The HTTP method
+ * @param  {string} url     The server URL
+ * @param  {object} headers The request headers
+ * @param  {string} body    The request body
+ * @return {Promise}        A promise that resolves into a { response, body } object, or rejects if some error occurs
  */
-function requestAsPromise(method, url){
+function requestAsPromise(method, url, headers, body){
    // *Returning the request promise:
    return new Promise((resolve, reject) => {
       // *Making the request:
-      request({ method, uri: url },
+      request({ method, url, headers, body },
       (error, response, body) => {
          // *If some error occurred, rejecting the promise:
          if(error) return reject(err);

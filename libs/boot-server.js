@@ -59,6 +59,7 @@ function startServer({ server_port, index_file, static_resources, api_resources 
    return new Promise((resolve, reject) => {
       // *Requiring the needed modules:
       const headers_util = require('./http-headers-util.js');
+      const { PARSERS } = require('./parsers.js');
       const { METHODS } = require('./methods.js');
       const express = require('express');
       const body_parser = require('body-parser');
@@ -71,7 +72,7 @@ function startServer({ server_port, index_file, static_resources, api_resources 
       try{
 
          // *Enabling JSON parsing and set the maximum body size:
-         app.use(body_parser.json({limit: '1mb'}));
+         //app.use(body_parser.json({limit: '1mb'}));
 
          // *Getting each dynamic resource:
          for(let { method, route, middleware, advanced } of api_resources){
@@ -81,9 +82,44 @@ function startServer({ server_port, index_file, static_resources, api_resources 
 
             // *Checking if advanced settings were set:
             if(advanced){
-               // *It it were:
+               // *If it were:
+               // *Getting the parsers:
+               const parsers = advanced.parsers;
                // *Getting the headers:
                const headers = advanced.headers;
+
+               // *Checking if there are parsers set:
+               if(parsers.length){
+                  // *If there are:
+                  // *Getting each parser set:
+                  parsers.forEach(({ type, options }) => {
+                     // *Checking the parser type:
+                     switch(type){
+                     case PARSERS.JSON:
+                        // *If it is a JSON parser:
+                        // *Adding the parser:
+                        middlewares.push(body_parser.json(options));
+                        break;
+                     case PARSERS.TEXT:
+                        // *If it is a text parser:
+                        // *Adding the parser:
+                        middlewares.push(body_parser.text(options));
+                        break;
+                     case PARSERS.RAW:
+                        // *If it is a raw parser:
+                        // *Adding the parser:
+                        middlewares.push(body_parser.raw(options));
+                        break;
+                     case PARSERS.URLENCODED:
+                        // *If it is an urlencoded parser:
+                        // *Adding the parser:
+                        middlewares.push(body_parser.urlencoded(options));
+                        break;
+                     }
+
+                  });
+
+               }
 
                // *Checking if there are headers set:
                if(headers.length){

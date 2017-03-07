@@ -1,3 +1,7 @@
+// *Requiring the needed modules:
+const { PARSERS } = require('./parsers.js');
+
+
 
 /**
  * Represents a set of advanced API settings
@@ -24,6 +28,15 @@ module.exports = class AdvancedAPIConfigurator{
        * @type {Map}
        */
       this._headers = new Map();
+
+      /**
+       * The parsers settings map
+       *  Key: The parser type ('json', 'raw', 'text' or 'urlencoded')
+       *  Value: The parser options object
+       * @private
+       * @type {Map}
+       */
+      this._parsers = new Map();
    }
 
 
@@ -128,6 +141,36 @@ module.exports = class AdvancedAPIConfigurator{
 
 
 
+   parseJSON(options){
+      // *Setting the parser options:
+      this._parsers.set(PARSERS.JSON, options);
+      // *Returning this configurator:
+      return this;
+   }
+
+   parseText(options){
+      // *Setting the parser options:
+      this._parsers.set(PARSERS.TEXT, options);
+      // *Returning this configurator:
+      return this;
+   }
+
+   parseRaw(options){
+      // *Setting the parser options:
+      this._parsers.set(PARSERS.RAW, options);
+      // *Returning this configurator:
+      return this;
+   }
+
+   parseURLEncoded(options){
+      // *Setting the parser options:
+      this._parsers.set(PARSERS.URLENCODED, options);
+      // *Returning this configurator:
+      return this;
+   }
+
+
+
    /**
     * Retrieves the API configurator
     * @return {APIConfigurator}  The API configurator (for configurator chaining)
@@ -153,6 +196,22 @@ module.exports = class AdvancedAPIConfigurator{
       this._headers.forEach((v, k) => headers.push({name: k, value: v}));
       // *Returning the list:
       return headers;
+   }
+
+
+
+   /**
+    * The parsers list
+    * @readonly
+    * @return {Array} An array containing { type, options } objects
+    */
+   get parsers(){
+      // *Starting the list:
+      let parsers = [];
+      // *Filling the list with the map's content:
+      this._parsers.forEach((v, k) => parsers.push({type: k, options: v}));
+      // *Returning the list:
+      return parsers;
    }
 
 };
