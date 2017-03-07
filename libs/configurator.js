@@ -130,9 +130,9 @@ module.exports = class Configurator{
 
 
    /**
-    * Retrieves the set server port
+    * Retrieves the server port
     * @readonly
-    * @return {number|string} The server port
+    * @type {number|string}
     */
    get server_port(){
       // *Returning the server port:
@@ -144,7 +144,7 @@ module.exports = class Configurator{
    /**
     * Retrieves the inner configurator for static resources
     * @readonly
-    * @return {StaticConfigurator} The configurator
+    * @type {StaticConfigurator}
     */
    get static(){
       // *Returning the inner configurator:
@@ -156,9 +156,11 @@ module.exports = class Configurator{
    /**
     * Retrieves the inner configurator for dynamic resources
     * @readonly
-    * @return {APIConfigurator} The configurator
+    * @type {APIConfigurator}
     */
    get api(){
+      // *Reseting the route chain state in the APIConfigurator:
+      this._api._outOfRouteChain();
       // *Returning the inner configurator:
       return this._api;
    }

@@ -3,7 +3,7 @@
 The `Configurator` class is the main resource of this project and serves as the entry point to setup the Express server.
 
 ```javascript
-let configurator = new Configurator();
+const server = new Configurator();
 ```
 
 <br><br>
@@ -19,7 +19,7 @@ _object_ \- A static enum of strings that has all the supported HTTP methods nam
 You can use it in conjunction with the api configurator to add a route middleware:
 
 ```javascript
-configurator.api
+server.api
    .add(Configurator.METHODS.GET, '/some-route', someMiddlewareFunction);
 ```
 
@@ -74,11 +74,11 @@ _**Note:** by default, the initial server port is `80`._
 #### Examples
 
 ```javascript
-console.log(configurator.server_port);   // Will print 80 (default port)
+console.log(server.server_port);   // Will print 80 (default port)
 
-configurator.port(3000);                 // Will set the port to 3000
-configurator.port('8080');               // Will set the port to '8080'
-configurator.port(process.env.PORT);     // Will use the PORT environment variable
+server.port(3000);                 // Will set the port to 3000
+server.port('8080');               // Will set the port to '8080'
+server.port(process.env.PORT);     // Will use the PORT environment variable
 ```
 
 ***
@@ -100,7 +100,7 @@ _**Note:** It will apply the settings and start the server, so it should be call
 #### Examples
 
 ```javascript
-configurator
+server
    .port(3000)
    .start()    // It will commit all settings and start the server
    .then(info => console.log('Server started at ' + info.address.href))

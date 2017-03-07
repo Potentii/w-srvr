@@ -1,5 +1,7 @@
 // *Requiring the needed modules:
 const Configurator = require('..');
+const AdvancedAPIConfigurator = require('../libs/advanced-api-configurator.js');
+const APIResource = require('../libs/api-resource.js');
 const { isMethodSupported } = require('../libs/methods.js');
 const path = require('path');
 const { expect } = require('chai');
@@ -31,18 +33,14 @@ describe('API', function(){
    });
 
 
-   it('stores the resources as \"{ method, route, middleware }\" objects', function(done){
+   it('stores the resources as \"APIResource\" objects', function(done){
       // *Adding resources:
       configurator.api
          .add('GET', '/zzz', ()=>{});
 
-      // *Expecting the resources to have the 'method', 'route' and 'middleware' attributes:
+      // *Expecting the resources to be APIResource objects:
       expect(configurator.api.resources[0])
-         .to.have.ownProperty('method');
-      expect(configurator.api.resources[0])
-         .to.have.ownProperty('route');
-      expect(configurator.api.resources[0])
-         .to.have.ownProperty('middleware');
+         .to.instanceOf(APIResource);
 
       // *Finishing this unit:
       done();
@@ -103,6 +101,34 @@ describe('API', function(){
       expect(configurator.api.resources[1].method).to.equal('POST');
       expect(configurator.api.resources[2].method).to.equal('PUT');
       expect(configurator.api.resources[3].method).to.equal('DELETE');
+
+      // *Finishing this unit:
+      done();
+   });
+
+
+   it('only allows the \"advanced\" chain to start right after a route has been added', function(done){
+      // *Expecting the advanced call to throw an error:
+      expect(() => configurator.api.advanced)
+         .to.throw(Error, 'The \"advanced\" call must be chained only right after a route has been added');
+
+      // *Adding a route:
+      configurator.api
+         .get('/yyy', ()=>{});
+
+      // *Expecting the advanced call to throw an error:
+      expect(() => configurator.api.advanced)
+         .to.throw(Error, 'The \"advanced\" call must be chained only right after a route has been added');
+
+      // *Expecting the advanced call to return a configurator:
+      expect(configurator.api.get('/zzz', ()=>{}).advanced)
+         .to.instanceOf(AdvancedAPIConfigurator);
+
+      // *Expecting the advanced call return a configurator that belongs only to the last added route:
+      expect(configurator.api
+         .get('/aaa', ()=>{}).advanced.done()
+         .get('/bbb', ()=>{}).advanced)
+            .to.equal(configurator.api.resources.find(r => r.route === '/bbb').advanced);
 
       // *Finishing this unit:
       done();

@@ -1,6 +1,7 @@
 // *Requiring the needed modules:
 const { METHODS, isMethodSupported } = require('./methods.js');
-
+const APIResource = require('./api-resource.js');
+const AdvancedAPIConfigurator = require('./advanced-api-configurator.js');
 
 
 /**
@@ -23,9 +24,17 @@ module.exports = class APIConfigurator{
       /**
        * API resources
        * @private
-       * @type {Array}
+       * @type {APIResource[]}
        */
       this._resources = [];
+
+      /**
+       * A flag that informs whether this configurator is in a route chain
+       *  Other configurators might control this flag's state with _outOfRouteChain()
+       * @private
+       * @type {boolean}
+       */
+      this._isInRouteChain = false;
    }
 
 
@@ -43,6 +52,46 @@ module.exports = class APIConfigurator{
 
 
    /**
+    * Starts an advanced configurator chain for the last added route
+    *  Must be called only right after a route has been added
+    * @readonly
+    * @return {AdvancedAPIConfigurator} The advanced configurator of the last added route
+    * @throws {Error}                   If it's not being called right after a route has been added
+    */
+   get advanced(){
+      // *Getting the last added resource:
+      let last_res = this._resources[this._resources.length-1];
+
+      // *Checking if the advanced chain is available, throwing an error if it's not:
+      if(!this._isInRouteChain || !last_res)
+         throw new Error('The \"advanced\" call must be chained only right after a route has been added');
+
+      // *Declaring the advanced configurator:
+      let advanced;
+
+      // *Checkin if the resource already has an advanced configurator set:
+      if(last_res.advanced){
+         // *If it has:
+         // *Getting it:
+         advanced = last_res.advanced
+      } else{
+         // *If it hasn't:
+         // *Creating a new one:
+         advanced = new AdvancedAPIConfigurator(this);
+         // *Assigning the resource's one:
+         last_res.advanced = advanced;
+      }
+
+      // *Changing the route chain status:
+      this._isInRouteChain = false;
+
+      // *Returning the advanced configurator:
+      return advanced;
+   }
+
+
+
+   /**
     * Registers a middleware for the given route and HTTP method
     * @param  {string} method                  A supported HTTP method (GET, POST, PUT, DELETE)
     * @param  {string} route                   The server route
@@ -52,19 +101,11 @@ module.exports = class APIConfigurator{
     * @throws {Error}                          If the method is not one of the supported HTTP methods
     */
    add(method, route, middleware){
-      // *Checking if the method is a string, throwing an error if it isn't:
-      if(!(typeof method === 'string'))
-         throw new TypeError('The \"method\" must be a string');
-
-      // *Making the method name upper case:
-      method = method.toUpperCase();
-
-      // *Checking if the given method is supported, and if it's not, throwing an error:
-      if(!isMethodSupported(method))
-         throw new Error('The \"' + method +'\" is not a supported HTTP method');
-
       // *Adding this resource into the array:
-      this._resources.push({ method, route, middleware });
+      this._resources.push(new APIResource(method, route, middleware, null));
+
+      // *Changing the chain flag status:
+      this._isInRouteChain = true;
 
       // *Returning this configurator:
       return this;
@@ -135,9 +176,21 @@ module.exports = class APIConfigurator{
 
 
    /**
+    * Resets the API route chain flag, so 'advanced' chains can't be created
+    *  Should only be used by configurators that have an APIConfigurator
+    * @private
+    */
+   _outOfRouteChain(){
+      // *Changing the route chain state:
+      this._isInRouteChain = false;
+   }
+
+
+
+   /**
     * Retrieves the API resources
     * @readonly
-    * @return {Array} An array containing '{ method, route, middleware }' objects
+    * @type {APIResource[]}
     */
    get resources(){
       return this._resources.concat([]);

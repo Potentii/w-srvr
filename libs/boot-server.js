@@ -58,65 +58,103 @@ function startServer({ server_port, index_file, static_resources, api_resources 
    // *Returning the starting promise:
    return new Promise((resolve, reject) => {
       // *Requiring the needed modules:
-      const url = require('url');
+      const headers_util = require('./http-headers-util.js');
       const { METHODS } = require('./methods.js');
-      // *Preparing the Expressjs instance:
       const express = require('express');
-      const app = express();
       const body_parser = require('body-parser');
+      const url = require('url');
+
+      // *Preparing the Expressjs instance:
+      const app = express();
 
       // *Trying to configure the server:
       try{
 
-         // *Enabling JSON parsing:
+         // *Enabling JSON parsing and set the maximum body size:
          app.use(body_parser.json({limit: '1mb'}));
 
-
-         // *Setting the headers:
-         app.use((req, res, next) => {
-            // *Setting the origins allowed:
-            res.header('Access-Control-Allow-Origin', '*');
-            // *Setting the HTTP methods allowed:
-            res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,PUSH,DELETE,OPTIONS');
-            // *Setting the headers allowed:
-            res.header('Access-Control-Allow-Headers', 'Content-Type,Accept');
-            // *Sending to the next middleware:
-            next();
-         });
-
-
-         // *Enabling POST requests via Ajax:
-         app.options('/*', (req, res, next) => {
-            // *Responding with 'OK':
-            res.status(200).end();
-         });
-
-
          // *Getting each dynamic resource:
-         for(let { method, route, middleware } of api_resources){
+         for(let { method, route, middleware, advanced } of api_resources){
+
+            // *Declaring the middlewares list:
+            const middlewares = [];
+
+            // *Checking if advanced settings were set:
+            if(advanced){
+               // *It it were:
+               // *Getting the headers:
+               const headers = advanced.headers;
+
+               // *Checking if there are headers set:
+               if(headers.length){
+                  // *If there are:
+                  // *Getting only the preflight headers:
+                  const preflight_headers = headers.filter(h => headers_util.isPreflight(h.name));
+                  // *Getting the headers that are not intended to be used just only in preflight responses:
+                  const normal_headers = headers.filter(h => headers_util.isNotOnlyPreflight(h.name));
+
+                  // *Checking if there are preflight headers set:
+                  if(preflight_headers.length){
+                     // *If there are:
+                     // *Registering an OPTIONS middleware to handle preflight requests when using CORS:
+                     app.options(route, (req, res, next) => {
+                        // *Adding the preflight headers:
+                        preflight_headers.forEach(({ name, value }) => res.header(name, value));
+                        // *Setting thes response as successful:
+                        res.status(200);
+                        // *Sending to the next middleware:
+                        next();
+                     });
+
+                  }
+
+                  // *Adding the 'headers handling' middleware to the list:
+                  middlewares.push(function(req, res, next){
+                     // *Adding all the normal headers into the response:
+                     normal_headers.forEach(({ name, value }) => res.header(name, value));
+                     // *Sending to the next middleware:
+                     next();
+                  });
+
+               }
+
+            }
+
+            // *Checking if the 'middleware' is actually an array:
+            if(Array.isArray(middleware)){
+               // *If it is:
+               // *Adding its items individualy in the list:
+               middlewares.push(...middleware);
+            } else{
+               // *If it isn't:
+               // *Adding it in the list:
+               middlewares.push(middleware);
+            }
+
             // *Checking the method type:
             switch(method){
             case METHODS.GET:
                // *If it is GET:
                // *Serving as GET:
-               app.get(route, middleware);
+               app.get(route, middlewares);
                break;
             case METHODS.POST:
                // *If it is POST:
                // *Serving as POST:
-               app.post(route, middleware);
+               app.post(route, middlewares);
                break;
             case METHODS.PUT:
                // *If it is PUT:
                // *Serving as PUT:
-               app.put(route, middleware);
+               app.put(route, middlewares);
                break;
             case METHODS.DELETE:
                // *If it is DELETE:
                // *Serving as DELETE:
-               app.delete(route, middleware);
+               app.delete(route, middlewares);
                break;
             }
+
          }
 
 
@@ -139,11 +177,17 @@ function startServer({ server_port, index_file, static_resources, api_resources 
          }
 
 
-         // *Resolving 404 errors:
+         // *Handling 404 errors:
          app.use((req, res, next) => {
-            // *Sending the error message:
-            res.status(404)
-               .send('Resource not found');
+            // *Checking if the status code has been set:
+            if(res.statusCode){
+               // *If it has:
+               // *Ending the response:
+               res.end();
+            } else{
+               // *Ending the response with a 'Resource not found' error:
+               res.status(404).end();
+            }
          });
 
 

@@ -107,9 +107,9 @@ module.exports = class StaticConfigurator{
 
 
    /**
-    * Retrieves index file path
+    * Retrieves absolute index file path
     * @readonly
-    * @return {string} The absolute file path
+    * @type {string}
     */
    get index_file(){
       return this._index_file;
@@ -118,9 +118,9 @@ module.exports = class StaticConfigurator{
 
 
    /**
-    * Retrieves the static resources
+    * Retrieves the static resources (array of '{ route, path }' objects)
     * @readonly
-    * @return {Array} An array containing '{ route, path }' objects
+    * @type {Array}
     */
    get resources(){
       return this._resources.concat([]);

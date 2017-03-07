@@ -39,7 +39,7 @@ Here is an example:
 ```javascript
 const Configurator = require('w-srvr');
 
-let server = new Configurator();
+const server = new Configurator();
 
 server
    // *Setting the port:
@@ -47,17 +47,17 @@ server
 
    // *Configuring the API:
    .api
-   .get('/api/users', (req, res, next) => {})
-   .get('/api/users/:id', (req, res, next) => {})
-   .post('/api/users', (req, res, next) => {})
-   .done()
+      .get('/api/users', (req, res, next) => {})
+      .get('/api/users/:id', (req, res, next) => {})
+      .post('/api/users', (req, res, next) => {})
+      .done()
 
    // *Configuring the static resources:
    .static
-   .add('/static/js', '../src/js')
-   .add('/static/css', '../src/css')
-   .index('../src/index.html')
-   .done()
+      .add('/static/js', '../src/js')
+      .add('/static/css', '../src/css')
+      .index('../src/index.html')
+      .done()
 
    // *Starting the server:
    .start()
@@ -88,18 +88,18 @@ A simple way to do it would be:
 
 > main.js
 
-```js
+```javascript
 server
    // *Setting up the server port:
    .port(3000)
 
    // *Setting up the static content, and the index page:
    .static
-   .add('/static/css', './src/css')
-   .add('/static/js',  './src/js')
-   .add('/static/img', './src/img')
-   .index('./src/index.html')
-   .done()
+      .add('/static/css', './src/css')
+      .add('/static/js',  './src/js')
+      .add('/static/img', './src/img')
+      .index('./src/index.html')
+      .done()
 
    // *Starting the server:
    .start()
@@ -117,19 +117,19 @@ server
 
 Is easy to build a simple web service with some routes:
 
-```js
+```javascript
 server
    // *Setting up the server port:
    .port(3000)
 
    // *Setting up the server routes:
    .api
-   .get('/ping', function(req, res, next){
-      res.status(200)
-         .send('pong')
-         .end();
-   })
-   .done()
+      .get('/ping', function(req, res, next){
+         res.status(200)
+            .send('pong')
+            .end();
+      })
+      .done()
 
    // *Starting the server:
    .start()
@@ -153,7 +153,7 @@ Considering that `users.js` exports some Expressjs middleware functions, we coul
 
 > main.js
 
-```js
+```javascript
 // *Getting the users middleware routes module:
 const users = require('./routes/users.js');
 
@@ -163,12 +163,12 @@ server
 
    // *Setting up the web service routes:
    .api
-   .get('/api/v1/users',        users.getAll)
-   .get('/api/v1/users/:id',    users.getOne)
-   .post('/api/v1/users',       users.insert)
-   .put('/api/v1/users/:id',    users.update)
-   .delete('/api/v1/users/:id', users.remove)
-   .done()
+      .get('/api/v1/users',        users.getAll)
+      .get('/api/v1/users/:id',    users.getOne)
+      .post('/api/v1/users',       users.insert)
+      .put('/api/v1/users/:id',    users.update)
+      .delete('/api/v1/users/:id', users.remove)
+      .done()
 
    // *Starting the server:
    .start()

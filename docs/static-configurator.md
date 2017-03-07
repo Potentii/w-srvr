@@ -3,10 +3,10 @@
 The `StaticConfigurator` class provides methods to register static resources in the server as well as an index page. An instance of this configurator can be found with the [`Configurator.prototype.static`](configurator.md#configuratorprototypestatic) property:
 
 ```javascript
-let configurator = new Configurator();
+const server = new Configurator();
 
 // *Getting the static configurator:
-let static_configurator = configurator.static;
+let static_configurator = server.static;
 ```
 
 <br><br>
@@ -26,6 +26,7 @@ _**Note:** readonly, use the_ [_`index()`_](#staticconfiguratorprototypeindexfil
 ### StaticConfigurator.prototype.resources
 
 _Array<{ route, path }>_ \- An array containing all the static resources
+
 - `route` _string_ \- The server route
 - `path` _string_ \- The absolute path to a file/directory in disk
 
@@ -59,7 +60,7 @@ _**Note:** The given file will be served in the root route (<http://localhost/>)
 #### Examples
 
 ```javascript
-configurator.static
+server.static
    .index('../src/my_index.html');
 ```
 
@@ -87,7 +88,7 @@ Registers a static directory or file to be served on the given route
 #### Examples
 
 ```javascript
-configurator.static
+server.static
    .add('/static/js', '../src/js')
    .add('/static/css', '../src/css')
    .add('/static/logo', '../src/images/logo.png');
@@ -109,7 +110,7 @@ Retrieves the main configurator
 
 ```javascript
 // *Main 'Configurator' object:
-configurator
+server
    .port(...)
    .static
       // *Inner 'StaticConfigurator' object:

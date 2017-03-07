@@ -3,11 +3,6 @@
   "libs": [
     "chai"
   ],
-  "loadEagerly": [
-    "main.js",
-    "libs/**",
-    "test/**"
-  ],
   "dontLoad": [
     "node_module/**"
   ],

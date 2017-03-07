@@ -63,85 +63,209 @@ describe('Boot', function(){
    });
 
 
-   it('configures static resources correctly', function(done){
-      // *Adding resources:
-      configurator.static
-         .add('/static', './mock/mock-src')
-         .index('./mock/mock-index.html')
-         .done()
+   describe('Static', function(){
 
-         // *Starting the server:
-         .start()
-         .then(({ address }) => {
-            // *Returning a promise chain that tests in parallel:
-            return Promise.all([
+      it('configures resources correctly', function(done){
+         // *Adding resources:
+         configurator.static
+            .add('/static', './mock/mock-src')
+            .index('./mock/mock-index.html')
+            .done()
 
-               // *Testing if the static content is being served:
-               requestAsPromise(Configurator.METHODS.GET, address.href + 'static/mock-file.txt')
-                  .then(res => {
-                     expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-src/mock-file.txt'), 'utf8'));
-                  }),
+            // *Starting the server:
+            .start()
+            .then(({ address }) => {
+               // *Returning a promise chain that tests in parallel:
+               return Promise.all([
 
-               // *Testing if the index page is being served:
-               requestAsPromise(Configurator.METHODS.GET, address.href)
-                  .then(res => {
-                     expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-index.html'), 'utf8'));
-                  })
+                  // *Testing if the static content is being served:
+                  requestAsPromise(Configurator.METHODS.GET, address.href + 'static/mock-file.txt')
+                     .then(res => {
+                        expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-src/mock-file.txt'), 'utf8'));
+                     }),
 
-               ])
-               .then(() => {
-                  // *Finishing this unit:
-                  done();
-               });
-         })
-         .catch(err => {
-            // *Finishing this unit with an error:
-            done(err);
-         });
+                  // *Testing if the index page is being served:
+                  requestAsPromise(Configurator.METHODS.GET, address.href)
+                     .then(res => {
+                        expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-index.html'), 'utf8'));
+                     })
+
+                  ])
+                  .then(() => {
+                     // *Finishing this unit:
+                     done();
+                  });
+            })
+            .catch(err => {
+               // *Finishing this unit with an error:
+               done(err);
+            });
+      });
+
    });
 
 
-   it('configures API resources correctly', function(done){
-      // *Adding resources:
-      configurator.api
-         .get('/zzz', (req, res, next) => {
-            res.status(200).send('a').end();
-         })
-         .post('/zzz', (req, res, next) => {
-            res.status(201).send('b').end();
-         })
-         .put('/zzz', (req, res, next) => {
-            res.status(200).send('c').end();
-         })
-         .delete('/zzz', (req, res, next) => {
-            res.status(200).send('d').end();
-         })
-         .done()
+   describe('API', function(){
 
-         // *Starting the server:
-         .start()
-         .then(({ address }) => {
-            // *Returning a promise chain that tests in parallel:
-            return Promise.all([
-               requestAsPromise(Configurator.METHODS.GET,    address.href + 'zzz'),
-               requestAsPromise(Configurator.METHODS.POST,   address.href + 'zzz'),
-               requestAsPromise(Configurator.METHODS.PUT,    address.href + 'zzz'),
-               requestAsPromise(Configurator.METHODS.DELETE, address.href + 'zzz'),
-            ])
-            .then(responses => {
-               // *Concatenating the responses body:
-               let responses_sum = responses.reduce((str, res) => str+res.body.toString(), '');
-               // *Expecting it to be correct:
-               expect(responses_sum).to.equal('abcd');
-               // *Finishing this unit:
-               done();
+      it('configures resources correctly', function(done){
+         // *Adding resources:
+         configurator.api
+            .get('/zzz', (req, res, next) => {
+               res.status(200).send('a').end();
             })
+            .post('/zzz', (req, res, next) => {
+               res.status(201).send('b').end();
+            })
+            .put('/zzz', (req, res, next) => {
+               res.status(200).send('c').end();
+            })
+            .delete('/zzz', (req, res, next) => {
+               res.status(200).send('d').end();
+            })
+            .done()
 
-         })
-         .catch(err => {
-            // *Finishing this unit with an error:
-            done(err);
-         });
+            // *Starting the server:
+            .start()
+            .then(({ address }) => {
+               // *Returning a promise chain that tests in parallel:
+               return Promise.all([
+                  requestAsPromise(Configurator.METHODS.GET,    address.href + 'zzz'),
+                  requestAsPromise(Configurator.METHODS.POST,   address.href + 'zzz'),
+                  requestAsPromise(Configurator.METHODS.PUT,    address.href + 'zzz'),
+                  requestAsPromise(Configurator.METHODS.DELETE, address.href + 'zzz'),
+               ])
+               .then(responses => {
+                  // *Concatenating the responses body:
+                  let responses_sum = responses.reduce((str, res) => str+res.body.toString(), '');
+                  // *Expecting it to be correct:
+                  expect(responses_sum).to.equal('abcd');
+                  // *Finishing this unit:
+                  done();
+               });
+
+            })
+            .catch(err => {
+               // *Finishing this unit with an error:
+               done(err);
+            });
+      });
+
+
+      it('applies advanced headers correctly', function(done){
+         // *Adding resources:
+         configurator.api
+            .get('/*', (req, res, next) => next())
+               .advanced
+               .allowedOrigins('zzz.com')
+               .done()
+            .get('/yyy', (req, res, next) => res.end())
+               .advanced
+               .allowedOrigins('yyy.com')
+               .done()
+            .get('/zzz', (req, res, next) => res.end())
+            .post('/zzz', (req, res, next) => res.end())
+               .advanced
+               .responseType('application/json')
+               .done()
+            .put('/zzz', (req, res, next) => res.end())
+            .done()
+
+            // *Starting the server:
+            .start()
+            .then(({ address }) => {
+               // *Returning a promise chain that tests in parallel:
+               return Promise.all([
+
+                  requestAsPromise(Configurator.METHODS.GET, address.href + 'yyy')
+                     .then(res => {
+                        expect(res.response.headers['access-control-allow-origin']).to.equal('yyy.com');
+                        expect(res.response.headers['content-type']).to.equal(undefined);
+                     }),
+
+                  requestAsPromise(Configurator.METHODS.GET, address.href + 'zzz')
+                     .then(res => {
+                        expect(res.response.headers['access-control-allow-origin']).to.equal('zzz.com');
+                        expect(res.response.headers['content-type']).to.equal(undefined);
+                     }),
+
+                  requestAsPromise(Configurator.METHODS.POST, address.href + 'zzz')
+                     .then(res => {
+                        expect(res.response.headers['access-control-allow-origin']).to.equal(undefined);
+                        expect(res.response.headers['content-type']).to.equal('application/json');
+                     }),
+
+                  requestAsPromise(Configurator.METHODS.PUT, address.href + 'zzz')
+                     .then(res => {
+                        expect(res.response.headers['access-control-allow-origin']).to.equal(undefined);
+                        expect(res.response.headers['content-type']).to.equal(undefined);
+                     })
+
+                  ])
+                  .then(() => {
+                     // *Finishing this unit:
+                     done();
+                  });
+
+            })
+            .catch(err => {
+               // *Finishing this unit with an error:
+               done(err);
+            });
+      });
+
+
+      it('applies CORS preflight headers correctly', function(done){
+         // *Adding resources:
+         configurator.api
+            .post('/zzz', (req, res, next) => res.end())
+               .advanced
+               .allowedOrigins('zzz.com')
+               .allowedHeaders('My-Header-1')
+               .allowedMethods('POST')
+               .exposedHeaders('My-Header-2')
+               .preflightMaxAge('200')
+               .done()
+            .done()
+
+            // *Starting the server:
+            .start()
+            .then(({ address }) => {
+               // *Returning a promise chain that tests in parallel:
+               return Promise.all([
+
+                  // *Testing the preflight request:
+                  requestAsPromise('OPTIONS', address.href + 'zzz')
+                     .then(res => {
+                        expect(res.response.headers['access-control-allow-origin']).to.equal('zzz.com');
+                        expect(res.response.headers['access-control-allow-headers']).to.equal('My-Header-1');
+                        expect(res.response.headers['access-control-allow-methods']).to.equal('POST');
+                        expect(res.response.headers['access-control-expose-headers']).to.equal(undefined);
+                        expect(res.response.headers['access-control-max-age']).to.equal('200');
+                     }),
+
+                  // *Testing the actual request (It should not receive all the CORS headers):
+                  requestAsPromise(Configurator.METHODS.POST, address.href + 'zzz')
+                     .then(res => {
+                        expect(res.response.headers['access-control-allow-origin']).to.equal('zzz.com');
+                        expect(res.response.headers['access-control-allow-headers']).to.equal(undefined);
+                        expect(res.response.headers['access-control-allow-methods']).to.equal(undefined);
+                        expect(res.response.headers['access-control-expose-headers']).to.equal('My-Header-2');
+                        expect(res.response.headers['access-control-max-age']).to.equal(undefined);
+                     })
+
+                  ])
+                  .then(() => {
+                     // *Finishing this unit:
+                     done();
+                  });
+
+            })
+            .catch(err => {
+               // *Finishing this unit with an error:
+               done(err);
+            });
+      });
+
    });
 
 });
