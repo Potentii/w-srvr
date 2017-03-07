@@ -80,7 +80,7 @@ module.exports = class Configurator{
 
    /**
     * Starts the server instance
-    * @return {Promise} The promise resolves into an info object containing the 'address' of the server, or it rejects if the server could not be started
+    * @return {Promise} The promise resolves into an { address, server} object, or it rejects if the server could not be started
     */
    start(){
       // *Checking if the server start promise is set, and if it is, returning it:
@@ -93,11 +93,11 @@ module.exports = class Configurator{
             static_resources: this._static.resources,
             api_resources: this._api.resources
          })
-         .then(info => {
+         .then(output => {
             // *Cleaning the stop promise, so it can be stopped again:
             this._server_stop_promise = null;
-            // *Returning the info into the promise chain:
-            return info;
+            // *Returning the output into the promise chain:
+            return output;
          });
 
       // *Returning the server start promise:
@@ -116,11 +116,11 @@ module.exports = class Configurator{
 
       // *Setting the server stop promise:
       this._server_stop_promise = boot_server.stop()
-         .then(info => {
+         .then(output => {
             // *Cleaning the start promise, so it can be started again:
             this._server_start_promise = null;
-            // *Returning the info into the promise chain:
-            return info;
+            // *Returning the output into the promise chain:
+            return output;
          });
 
       // *Returning the server stop promise:
@@ -130,9 +130,9 @@ module.exports = class Configurator{
 
 
    /**
-    * Retrieves the set server port
+    * Retrieves the server port
     * @readonly
-    * @return {number|string} The server port
+    * @type {number|string}
     */
    get server_port(){
       // *Returning the server port:
@@ -144,7 +144,7 @@ module.exports = class Configurator{
    /**
     * Retrieves the inner configurator for static resources
     * @readonly
-    * @return {StaticConfigurator} The configurator
+    * @type {StaticConfigurator}
     */
    get static(){
       // *Returning the inner configurator:
@@ -156,9 +156,11 @@ module.exports = class Configurator{
    /**
     * Retrieves the inner configurator for dynamic resources
     * @readonly
-    * @return {APIConfigurator} The configurator
+    * @type {APIConfigurator}
     */
    get api(){
+      // *Reseting the route chain state in the APIConfigurator:
+      this._api._outOfRouteChain();
       // *Returning the inner configurator:
       return this._api;
    }
