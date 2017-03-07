@@ -1,6 +1,6 @@
 {
   "name": "w-srvr",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "A simple web server configurator for Expressjs",
   "author": "Guilherme Reginaldo Ruella <potentii@gmail.com>",
   "license": "MIT",
@@ -11,7 +11,7 @@
     "express"
   ],
   "scripts": {
-    "test": "mocha test/main.js"
+    "test": "mocha test/test.js"
   },
   "main": "main.js",
   "repository": {
@@ -33,7 +33,8 @@
     "express": "^4.14.1"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "mocha": "^3.2.0",
-    "chai": "^3.5.0"
+    "request": "^2.79.0"
   }
 }
