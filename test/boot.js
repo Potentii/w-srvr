@@ -52,14 +52,161 @@ describe('Boot', function(){
                .to.have.ownProperty('server');
             expect(output)
                .to.have.ownProperty('address');
-
-            // *Finishing this unit:
-            done();
          })
-         .catch(err => {
-            // *Finishing this unit with an error:
-            done(err);
-         });
+         // *If everything went well, finishing this unit:
+         .then(() => done())
+         // *If some error occured, finishing this unit with an error:
+         .catch(done);
+   });
+
+
+   describe('Hooks', function(){
+
+      it('calls the hooks functions', function(done){
+         // *Starting a control variable:
+         let control = 0;
+
+         // *Assigning some hook functions and starting the server:
+         configurator
+            .on(Configurator.HOOKS.BEFORE_SETUP, () => control++)
+            .on(Configurator.HOOKS.AFTER_SETUP, () => control++)
+            .start()
+            // *Expecting that the control variable were assigned correctly (which means that the hooks have been called):
+            .then(() => expect(control).to.equal(2))
+            // *If everything went well, finishing this unit:
+            .then(() => done())
+            // *If some error occured, finishing this unit with an error:
+            .catch(done);
+      });
+
+   });
+
+   it('ends responses chains', function(done){
+      // *Adding a route that tries to chain with others:
+      configurator
+         .api
+            .get('/', (req, res, next) => {
+               res.status(200);
+               next();
+            })
+            .done()
+         // *Starting the server:
+         .start()
+         .then(({ address }) => {
+            // *Testing if the response is being sent back:
+            return requestAsPromise(Configurator.METHODS.GET, address.href)
+               .then(res => expect(res.response.statusCode).to.equal(200));
+         })
+         // *If everything went well, finishing this unit:
+         .then(() => done())
+         // *If some error occured, finishing this unit with an error:
+         .catch(done);
+   });
+
+
+   describe('404', function(){
+
+      it('defaults the initial status code to \"404 NOT FOUND\" for each route', function(done){
+         // *Adding a route that just responds back:
+         configurator
+            .api
+               .get('/', (req, res, next) => res.end())
+               .done()
+            // *Starting the server:
+            .start()
+            .then(({ address }) => {
+               // *Testing if the response is being sent back with the default status code:
+               return requestAsPromise(Configurator.METHODS.GET, address.href)
+                  .then(res => expect(res.response.statusCode).to.equal(404));
+            })
+            // *If everything went well, finishing this unit:
+            .then(() => done())
+            // *If some error occured, finishing this unit with an error:
+            .catch(done);
+      });
+
+      it('sends a \"404 NOT FOUND\" response only if none of the routes matches', function(done){
+         // *Adding a route that just responds back with a '200 OK' code:
+         configurator
+            .api
+               .get('/', (req, res, next) => res.status(200).end())
+               .done()
+            // *Starting the server:
+            .start()
+            .then(({ address }) => {
+               return Promise.all([
+                  // *Testing if the route is being matched:
+                  requestAsPromise(Configurator.METHODS.GET, address.href)
+                     .then(res => expect(res.response.statusCode).to.equal(200)),
+
+                  // *Testing if the route is not being matched:
+                  requestAsPromise(Configurator.METHODS.GET, address.href + 'zzz')
+                     .then(res => expect(res.response.statusCode).to.equal(404))
+               ]);
+            })
+            // *If everything went well, finishing this unit:
+            .then(() => done())
+            // *If some error occured, finishing this unit with an error:
+            .catch(done);
+      });
+
+      it('executes the custom \"not found\" middleware', function(done){
+         // *Adding a custom 404 handler middleware:
+         configurator
+            .notFound((req, res, next) => res.send('zzz').end())
+            // *Starting the server:
+            .start()
+            .then(({ address }) => {
+               // *Testing if the response is being sent back with the correct status and body:
+               return requestAsPromise(Configurator.METHODS.GET, address.href)
+                  .then(res => {
+                     expect(res.response.statusCode).to.equal(404);
+                     expect(res.body.toString()).to.equal('zzz');
+                  });
+            })
+            // *If everything went well, finishing this unit:
+            .then(() => done())
+            // *If some error occured, finishing this unit with an error:
+            .catch(done);
+      });
+
+      it('allows the custom \"not found\" middleware to change the response status', function(done){
+         // *Adding a custom 404 handler middleware that changes the response status:
+         configurator
+            .notFound((req, res, next) => res.status(200).end())
+            // *Starting the server:
+            .start()
+            .then(({ address }) => {
+               // *Testing if the response is being sent back with the correct status:
+               return requestAsPromise(Configurator.METHODS.GET, address.href)
+                  .then(res => expect(res.response.statusCode).to.equal(200));
+            })
+            // *If everything went well, finishing this unit:
+            .then(() => done())
+            // *If some error occured, finishing this unit with an error:
+            .catch(done);
+      });
+
+      it('ends responses chain after the custom \"not found\" middleware', function(done){
+         // *Adding a custom 404 handler middleware that tries to chain with other middlewares:
+         configurator
+            .notFound((req, res, next) => {
+               res.status(200);
+               next();
+            })
+            // *Starting the server:
+            .start()
+            .then(({ address }) => {
+               // *Testing if the response is being sent back with the correct status:
+               return requestAsPromise(Configurator.METHODS.GET, address.href)
+                  .then(res => expect(res.response.statusCode).to.equal(200));
+            })
+            // *If everything went well, finishing this unit:
+            .then(() => done())
+            // *If some error occured, finishing this unit with an error:
+            .catch(done);
+      });
+
    });
 
 
@@ -69,7 +216,6 @@ describe('Boot', function(){
          // *Adding resources:
          configurator.static
             .add('/static', './mock/mock-src')
-            .index('./mock/mock-index.html')
             .done()
 
             // *Starting the server:
@@ -77,29 +223,100 @@ describe('Boot', function(){
             .then(({ address }) => {
                // *Returning a promise chain that tests in parallel:
                return Promise.all([
-
                   // *Testing if the static content is being served:
                   requestAsPromise(Configurator.METHODS.GET, address.href + 'static/mock-file.txt')
                      .then(res => {
+                        expect(res.response.statusCode).to.equal(200);
                         expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-src/mock-file.txt'), 'utf8'));
                      }),
 
-                  // *Testing if the index page is being served:
-                  requestAsPromise(Configurator.METHODS.GET, address.href)
+                  // *Testing if a 404 response is being sent if the resource does not exist:
+                  requestAsPromise(Configurator.METHODS.GET, address.href + 'static/mock-file-that-does-not-exists.txt')
                      .then(res => {
-                        expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-index.html'), 'utf8'));
+                        expect(res.response.statusCode).to.equal(404);
+                        expect(res.body.toString()).to.be.empty;
                      })
-
-                  ])
-                  .then(() => {
-                     // *Finishing this unit:
-                     done();
-                  });
+               ]);
             })
-            .catch(err => {
-               // *Finishing this unit with an error:
-               done(err);
-            });
+            // *If everything went well, finishing this unit:
+            .then(() => done())
+            // *If some error occured, finishing this unit with an error:
+            .catch(done);
+      });
+
+
+      describe('Index', function(){
+
+         it('sends the index page only in root by default', function(done){
+            // *Adding resources:
+            configurator
+               .static
+                  .index('./mock/mock-index.html')
+                  .done()
+
+               // *Starting the server:
+               .start()
+               .then(({ address }) => {
+                  // *Returning a promise chain that tests in parallel:
+                  return Promise.all([
+
+                     // *Testing if the index page is being served on root route:
+                     requestAsPromise(Configurator.METHODS.GET, address.href)
+                        .then(res => {
+                           expect(res.response.statusCode).to.equal(200);
+                           expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-index.html'), 'utf8'));
+                        }),
+
+                     // *Testing if the index page is not being served on other routes:
+                     requestAsPromise(Configurator.METHODS.GET, address.href + 'zzz')
+                        .then(res => {
+                           expect(res.body.toString()).to.empty;
+                           expect(res.response.statusCode).to.equal(404);
+                        })
+
+                     ])
+               })
+               // *If everything went well, finishing this unit:
+               .then(() => done())
+               // *If some error occured, finishing this unit with an error:
+               .catch(done);
+         });
+
+         it('sends the index page on all available routes if \"root_only\" is set to \"false\"', function(done){
+            // *Adding resources:
+            configurator
+               .static
+                  .index('./mock/mock-index.html', {root_only:false})
+                  .done()
+
+               // *Starting the server:
+               .start()
+               .then(({ address }) => {
+                  // *Returning a promise chain that tests in parallel:
+                  return Promise.all([
+
+                     // *Testing if the index page is being served on root route:
+                     requestAsPromise(Configurator.METHODS.GET, address.href)
+                        .then(res => {
+                           expect(res.response.statusCode).to.equal(200);
+                           expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-index.html'), 'utf8'));
+                        }),
+
+                     // *Testing if the index page is being served on other routes as well:
+                     requestAsPromise(Configurator.METHODS.GET, address.href + 'zzz')
+                        .then(res => {
+                           expect(res.response.statusCode).to.equal(200);
+                           expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-index.html'), 'utf8'));
+                        })
+
+                     ])
+               })
+               // *If everything went well, finishing this unit:
+               .then(() => done())
+               // *If some error occured, finishing this unit with an error:
+               .catch(done);
+         });
+
       });
 
    });
@@ -330,9 +547,9 @@ function requestAsPromise(method, url, headers, body){
    return new Promise((resolve, reject) => {
       // *Making the request:
       request({ method, url, headers, body },
-      (error, response, body) => {
+      (err, response, body) => {
          // *If some error occurred, rejecting the promise:
-         if(error) return reject(err);
+         if(err) return reject(err);
          // *Resolving the promise with the response from the server:
          resolve({ response, body });
       });

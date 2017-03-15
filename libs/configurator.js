@@ -2,6 +2,8 @@
 const StaticConfigurator = require('./static-configurator.js');
 const APIConfigurator = require('./api-configurator.js');
 const boot_server = require('./boot-server.js');
+const { HOOKS } = require('./hooks.js');
+const EventEmitter = require('events');
 
 
 
@@ -36,6 +38,13 @@ module.exports = class Configurator{
       this._api = new APIConfigurator(this);
 
       /**
+       * The express middlewares to handle 404 status
+       * @private
+       * @type {function[]}
+       */
+      this._not_found_middlewares = [];
+
+      /**
        * The start server task promise
        * @private
        * @type {Promise}
@@ -48,6 +57,8 @@ module.exports = class Configurator{
        * @type {Promise}
        */
       this._server_stop_promise = null;
+
+      this._ee = new EventEmitter();
    }
 
 
@@ -56,10 +67,24 @@ module.exports = class Configurator{
     * Retrieves the supported HTTP methods enum
     * @readonly
     * @static
+    * @enum {string}
     */
    static get METHODS(){
       // *Returning the enum:
       return APIConfigurator.METHODS;
+   }
+
+
+
+   /**
+    * Retrieves the available hook events enum
+    * @readonly
+    * @static
+    * @enum {string}
+    */
+   static get HOOKS(){
+      // *Returning the enum:
+      return HOOKS;
    }
 
 
@@ -79,6 +104,46 @@ module.exports = class Configurator{
 
 
    /**
+    * Registers a middleware to handle 404 responses
+    * @param {function|function[]} middleware A valid Expressjs middleware function
+    * @return {Configurator}                  This configurator (for method chaining)
+    */
+   notFound(middleware){
+      // *Checking if the middleware is set:
+      if(middleware){
+         // *Checking if the middleware is an array:
+         if(Array.isArray(middleware)){
+            // *If it is:
+            // *Adding its items individualy in the list:
+            this._not_found_middlewares.push(...middleware);
+         } else{
+            // *If it isn't:
+            // *Adding it in the list:
+            this._not_found_middlewares.push(middleware);
+         }
+      }
+      // *Returning this configurator:
+      return this;
+   }
+
+
+
+   /**
+    * Register a handler for a given event
+    * @param  {string} event       The event name
+    * @param  {function} listeners The handler function
+    * @return {Configurator}       This configurator (for method chaining)
+    */
+   on(event, listeners){
+      // *Registering the handler in the internal event emitter:
+      this._ee.on(event, listeners);
+      // *Returning this configurator:
+      return this;
+   }
+
+
+
+   /**
     * Starts the server instance
     * @return {Promise} The promise resolves into an { address, server} object, or it rejects if the server could not be started
     */
@@ -89,9 +154,11 @@ module.exports = class Configurator{
       // *Setting the server start promise:
       this._server_start_promise = boot_server.start({
             server_port: this._server_port,
-            index_file: this._static.index_file,
+            not_found_middlewares: this._not_found_middlewares,
+            index: this._static._index,
             static_resources: this._static.resources,
-            api_resources: this._api.resources
+            api_resources: this._api.resources,
+            ee: this._ee
          })
          .then(output => {
             // *Cleaning the stop promise, so it can be stopped again:

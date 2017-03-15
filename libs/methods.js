@@ -3,29 +3,9 @@
  * @readonly
  * @enum {string}
  */
-const METHODS_ENUM = {
-   get GET(){
-      return 'GET';
-   },
-   get POST(){
-      return 'POST';
-   },
-   get PUT(){
-      return 'PUT';
-   },
-   get DELETE(){
-      return 'DELETE';
-   },
-   get HEAD(){
-      return 'HEAD';
-   },
-   get PATCH(){
-      return 'PATCH';
-   },
-   get OPTIONS(){
-      return 'OPTIONS';
-   }
-};
+const METHODS_ENUM = Object.freeze({
+   GET: 'GET', POST: 'POST', PUT: 'PUT', DELETE: 'DELETE', HEAD: 'HEAD', PATCH: 'PATCH', OPTIONS: 'OPTIONS'
+});
 
 
 
