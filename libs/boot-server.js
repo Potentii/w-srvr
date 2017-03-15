@@ -1,7 +1,7 @@
 /**
  * The server instance
  */
-let server;
+let server = null;
 
 /**
  * A set of connection sockets
@@ -54,13 +54,14 @@ function stop(){
  * @return {Promise}         The server starting promise
  * @author Guilherme Reginaldo Ruella
  */
-function startServer({ server_port, index_file, static_resources, api_resources }){
+function startServer({ server_port, not_found_middlewares, index, static_resources, api_resources, ee }){
    // *Returning the starting promise:
    return new Promise((resolve, reject) => {
       // *Requiring the needed modules:
       const headers_util = require('./http-headers-util.js');
       const { PARSERS } = require('./parsers.js');
       const { METHODS } = require('./methods.js');
+      const { HOOKS } = require('./hooks.js');
       const express = require('express');
       const body_parser = require('body-parser');
       const url = require('url');
@@ -68,8 +69,24 @@ function startServer({ server_port, index_file, static_resources, api_resources 
       // *Preparing the Expressjs instance:
       const app = express();
 
+
+      // *Emitting the 'before setup' event:
+      ee.emit(HOOKS.BEFORE_SETUP, app, express);
+
+
       // *Trying to configure the server:
       try{
+
+         // *Defining the prefixed middleware:
+         app.use((req, res, next) => {
+            // *Setting the default status code to 404:
+            res.status(404);
+            // *Sending to the next middleware:
+            next();
+         });
+
+         // *Emitting the 'before api setup' event:
+         ee.emit(HOOKS.BEFORE_API_SETUP, app, express);
 
          // *Getting each dynamic resource:
          for(let { methods, route, middleware, advanced } of api_resources){
@@ -211,34 +228,87 @@ function startServer({ server_port, index_file, static_resources, api_resources 
          }
 
 
-         // *Getting each static resource:
-         for(let { route, path } of static_resources){
-            // *Serving the static resource:
-            app.use(route, express.static(path));
-         }
+         // *Emitting the 'after api setup' event:
+         ee.emit(HOOKS.AFTER_API_SETUP, app, express);
 
+
+         // *Emitting the 'before static setup' event:
+         ee.emit(HOOKS.BEFORE_STATIC_SETUP, app, express);
+
+
+         // *Checking if there is any static resources set:
+         if(static_resources.length){
+            // *If there is:
+            // *Defining the static headers middleware:
+            const static_middleware = (res, path, stat) => res.status(200);
+
+            // *Getting each static resource:
+            for(let { route, path } of static_resources){
+               // *Serving the static resource:
+               app.use(route, express.static(path, {
+                  index: false,
+                  redirect: false,
+                  setHeaders: static_middleware
+               }));
+            }
+         }
 
          // *Checking if the index file is set:
-         if(index_file){
+         if(index && index.file){
             // *If it is:
-            // *Serving the index file:
-            app.use('/', (req, res, next) => {
-               // *Sending the file:
-               res.status(200)
-                  .sendFile(index_file);
-            });
+            // *Building the index page middleware:
+            let index_middleware = (req, res, next) => {
+               // *Sending the index file:
+               res.status(200).sendFile(index.file);
+            };
+
+            // *Checking if the 'roots only' flag is true:
+            if(index.options.root_only){
+               // *If it is:
+               // *Only sending the index poge on the root route:
+               app.get('/', index_middleware);
+            } else{
+               // *If it's not:
+               // *Sending the index page on all the available routes:
+               app.get('/*', index_middleware);
+            }
          }
 
 
-         // *Handling 404 errors:
+         // *Emitting the 'after static setup' event:
+         ee.emit(HOOKS.AFTER_STATIC_SETUP, app, express);
+
+
+         // *Handling hanging responses:
          app.use((req, res, next) => {
-            // *Checking if the status code has been set:
-            if(res.statusCode){
-               // *If it has:
+            // *Checking if the status code is different than 404:
+            if(res.statusCode != 404){
+               // *If it is:
                // *Ending the response:
                res.end();
             } else{
-               // *Ending the response with a 'Resource not found' error:
+               // *If it's not:
+               // *Sending to the 404 middlewares:
+               next();
+            }
+         });
+
+         // *Getting each 'not found' middleware:
+         for(let not_found_middleware of not_found_middlewares){
+            // *Using it:
+            app.use(not_found_middleware);
+         }
+
+         // *Handling hanging responses (as the custom 404 middleware could left them hanging):
+         app.use((req, res, next) => {
+            // *Checking if the status code is different than 404:
+            if(res.statusCode != 404){
+               // *If it is:
+               // *Ending the response:
+               res.end();
+            } else{
+               // *If it's not:
+               // *Ending the response with a '404 NOT FOUND':
                res.status(404).end();
             }
          });
@@ -249,6 +319,10 @@ function startServer({ server_port, index_file, static_resources, api_resources 
          // *Checking if the port could be set, and if it couldn't, throwing an error:
          if(!app.locals.port)
             throw new Error('The server port must be set');
+
+
+         // *Emitting the 'after setup' event:
+         ee.emit(HOOKS.AFTER_SETUP, app, express);
 
 
          // *Starting up the server:
@@ -303,6 +377,7 @@ function stopServer(){
 
       // *When the server closes:
       server.close(err => {
+         server = null;
          // *Resolving the promise:
          resolve();
       });

@@ -22,11 +22,16 @@ module.exports = class StaticConfigurator{
       this._main_configurator = main_configurator;
 
       /**
-       * The index page file path
+       * The index page resource
        * @private
        * @type {string}
        */
-      this._index_file = null;
+      this._index = {
+         file: null,
+         options: {
+            root_only: true
+         }
+      };
 
       /**
        * Static resources
@@ -40,12 +45,14 @@ module.exports = class StaticConfigurator{
 
    /**
     * Sets the main HTML file
-    * @param  {string} file  The relative/absolute file path
-    * @return {Configurator} This configurator (for method chaining)
-    * @throws {TypeError}    If the file is not a string
-    * @throws {Error}        If the file does not represent a path to a file
+    * @param  {string} file                      The relative/absolute file path
+    * @param  {object} [options]                 Aditional options
+    * @param  {boolean} [options.root_only=true] (initial value is 'true') It sets whether the index file should be served only on the root route ('/'), or on all available routes
+    * @return {Configurator}                     This configurator (for method chaining)
+    * @throws {TypeError}                        If the file is not a string
+    * @throws {Error}                            If the file does not represent a path to a file
     */
-   index(file){
+   index(file, options){
       // *Checking if the file is a string, throwing an error if it isn't:
       if(!(typeof file === 'string'))
          throw new TypeError('The \"file\" must be a string');
@@ -61,8 +68,14 @@ module.exports = class StaticConfigurator{
          file = path.join(path.dirname(stack()[1].getFileName()), file);
       }
 
-      // *Setting the file name:
-      this._index_file = file;
+      // *Getting the root only option:
+      let root_only = options && options.hasOwnProperty('root_only')
+         ? Boolean(options.root_only)
+         : this._index.options.root_only;
+
+      // *Setting the index page settings:
+      this._index = { file, options: { root_only } };
+
       // *Returning this configurator:
       return this;
    }
@@ -112,7 +125,7 @@ module.exports = class StaticConfigurator{
     * @type {string}
     */
    get index_file(){
-      return this._index_file;
+      return this._index.file;
    }
 
 

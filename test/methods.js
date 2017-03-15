@@ -68,4 +68,19 @@ describe('Methods', function(){
       done();
    });
 
+
+   it('does not allow to add other methods', function(done){
+      // *Enabling the strict mode:
+      'use strict';
+
+      // *Expecting changes on the enum to throw a TypeError, due to the strict mode:
+      expect(() => METHODS.ABC = 'ABC')
+         .to.throw(TypeError);
+
+      expect(METHODS.ABC).to.equal(undefined);
+
+      // *Finishing this unit:
+      done();
+   });
+
 });
