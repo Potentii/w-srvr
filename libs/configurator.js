@@ -104,7 +104,7 @@ module.exports = class Configurator{
 
 
    /**
-    * Registers a middleware to handle 404 responses
+    * Registers middlewares to handle 404 responses
     * @param {function|function[]} middleware A valid Expressjs middleware function
     * @return {Configurator}                  This configurator (for method chaining)
     */
@@ -129,14 +129,14 @@ module.exports = class Configurator{
 
 
    /**
-    * Register a handler for a given event
-    * @param  {string} event       The event name
-    * @param  {function} listeners The handler function
-    * @return {Configurator}       This configurator (for method chaining)
+    * Registers a handler for a given event
+    * @param  {string} event      The event name
+    * @param  {function} listener The handler function
+    * @return {Configurator}      This configurator (for method chaining)
     */
-   on(event, listeners){
+   on(event, listener){
       // *Registering the handler in the internal event emitter:
-      this._ee.on(event, listeners);
+      this._ee.on(event, listener);
       // *Returning this configurator:
       return this;
    }

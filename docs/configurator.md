@@ -29,6 +29,39 @@ This will register a middleware for a `GET` request on `'/some-route'`.
 
 <br>
 
+### Configurator.HOOKS
+
+_object_ \- A static enum of all the available hooks events names, which are _(in the order they're executed)_:
+
+- `BEFORE_SETUP` \- It'll be emitted when the internal `Expressjs` instance is created, but before it gets configured
+- `BEFORE_API_SETUP` \- It'll be emitted right before the `API` resources are set
+- `AFTER_API_SETUP` \- It'll be emitted when all the `API` resources have been set
+- `BEFORE_STATIC_SETUP` \- It'll be emitted right before the `static` resources are set
+- `AFTER_STATIC_SETUP` \- It'll be emitted when all the `static` resources have been set
+- `AFTER_SETUP` \- It'll be emitted when all the configurations were applied and the server is about to get initialized
+
+_**Note:** All the hook functions will receive the `express instance`, and the `express module` as arguments._
+
+_**Note:** You can also use the hook event name itself, they are: `'before-setup'`, `'before-api-setup'`, `'after-api-setup'`, `'before-static-setup'`, `'after-static-setup'` and `'after-setup'`._
+
+#### Examples
+
+Using with the [`Configurator.prototype.on(event, listener)`](#configuratorprototypeonevent-listener) to register hook functions:
+
+```javascript
+server
+   .on(Configurator.HOOKS.BEFORE_API_SETUP, (app, express) => {
+      // *Do something cool...
+   })
+   .on('before-api-setup', (app, express) => {
+      // *Do something cool here...
+   });
+```
+
+***
+
+<br>
+
 ### Configurator.prototype.server\_port
 
 _number|string_ \- The server port
@@ -79,6 +112,65 @@ console.log(server.server_port);   // Will print 80 (default port)
 server.port(3000);                 // Will set the port to 3000
 server.port('8080');               // Will set the port to '8080'
 server.port(process.env.PORT);     // Will use the PORT environment variable
+```
+
+***
+
+<br>
+
+### Configurator.prototype.notFound(middleware)
+
+Registers middlewares to handle 404 responses.
+
+_**Note:** it can be used to send custom 404 pages or API responses._
+
+_**Note:** you can call this method multiple times to add more middlewares, but you can also simply pass an array of middlewares._
+
+#### Parameters
+
+- `middleware` _function|function[]_ \- A valid Expressjs middleware function
+
+#### Returns
+
+[_Configurator_](#) \- This same configurator (for method chaining)
+
+#### Examples
+
+```javascript
+server
+   .notFound((req, res, next) => {
+      // *Do something cool here...
+   });
+```
+
+***
+
+<br>
+
+### Configurator.prototype.on(event, listener)
+
+Registers a handler for a given event.
+
+_**Note:** it can be used to configure hook functions._
+
+_**See:**_ [_`Configurator.HOOKS`_](#configuratorhooks) _for all the hooks events available._
+
+#### Parameters
+
+- `event` _string_ \- The event name
+- `listener` _function_ \- The handler function
+
+#### Returns
+
+[_Configurator_](#) \- This same configurator (for method chaining)
+
+#### Examples
+
+```javascript
+server
+   .on('before-api-setup', (app, express) => {
+      // *Do something cool here...
+   });
 ```
 
 ***

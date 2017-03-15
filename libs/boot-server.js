@@ -85,6 +85,8 @@ function startServer({ server_port, not_found_middlewares, index, static_resourc
             next();
          });
 
+         // *Emitting the 'before api setup' event:
+         ee.emit(HOOKS.BEFORE_API_SETUP, app, express);
 
          // *Getting each dynamic resource:
          for(let { methods, route, middleware, advanced } of api_resources){
@@ -226,6 +228,14 @@ function startServer({ server_port, not_found_middlewares, index, static_resourc
          }
 
 
+         // *Emitting the 'after api setup' event:
+         ee.emit(HOOKS.AFTER_API_SETUP, app, express);
+
+
+         // *Emitting the 'before static setup' event:
+         ee.emit(HOOKS.BEFORE_STATIC_SETUP, app, express);
+
+
          // *Checking if there is any static resources set:
          if(static_resources.length){
             // *If there is:
@@ -242,7 +252,6 @@ function startServer({ server_port, not_found_middlewares, index, static_resourc
                }));
             }
          }
-
 
          // *Checking if the index file is set:
          if(index && index.file){
@@ -264,6 +273,10 @@ function startServer({ server_port, not_found_middlewares, index, static_resourc
                app.get('/*', index_middleware);
             }
          }
+
+
+         // *Emitting the 'after static setup' event:
+         ee.emit(HOOKS.AFTER_STATIC_SETUP, app, express);
 
 
          // *Handling hanging responses:

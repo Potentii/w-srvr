@@ -38,15 +38,17 @@ _**Note:** readonly, use the_ [_`add()`_](#staticconfiguratorprototypeaddroute-r
 
 ## Methods
 
-### StaticConfigurator.prototype.index(file)
+### StaticConfigurator.prototype.index(file, options)
 
 Sets the main HTML file
 
-_**Note:** The given file will be served in the root route (<http://localhost/>)._
+_**Note:** By default, the given file will be served only on the root route (i.e. <http://localhost/>)._
 
 #### Parameters
 
 - `file` _string_ \- The relative/absolute file path
+- `options` _object_ \- \[optional\] Aditional options, the following properties can be set:
+ - `options.root_only` _boolean_ \- It sets whether the index file should be served only at the root route (`'/'`), or at all available routes (initial value is `true`)
 
 #### Returns
 
@@ -61,7 +63,7 @@ _**Note:** The given file will be served in the root route (<http://localhost/>)
 
 ```javascript
 server.static
-   .index('../src/my_index.html');
+   .index('../src/my_index.html', { root_only: true });
 ```
 
 ***

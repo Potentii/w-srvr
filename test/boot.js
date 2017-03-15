@@ -69,10 +69,17 @@ describe('Boot', function(){
          // *Assigning some hook functions and starting the server:
          configurator
             .on(Configurator.HOOKS.BEFORE_SETUP, () => control++)
+
+            .on(Configurator.HOOKS.BEFORE_API_SETUP, () => control++)
+            .on(Configurator.HOOKS.AFTER_API_SETUP, () => control++)
+
+            .on(Configurator.HOOKS.BEFORE_STATIC_SETUP, () => control++)
+            .on(Configurator.HOOKS.AFTER_STATIC_SETUP, () => control++)
+
             .on(Configurator.HOOKS.AFTER_SETUP, () => control++)
             .start()
             // *Expecting that the control variable were assigned correctly (which means that the hooks have been called):
-            .then(() => expect(control).to.equal(2))
+            .then(() => expect(control).to.equal(6))
             // *If everything went well, finishing this unit:
             .then(() => done())
             // *If some error occured, finishing this unit with an error:
@@ -214,10 +221,10 @@ describe('Boot', function(){
 
       it('configures resources correctly', function(done){
          // *Adding resources:
-         configurator.static
-            .add('/static', './mock/mock-src')
-            .done()
-
+         configurator
+            .static
+               .add('/static', './mock/mock-src')
+               .done()
             // *Starting the server:
             .start()
             .then(({ address }) => {
@@ -253,7 +260,6 @@ describe('Boot', function(){
                .static
                   .index('./mock/mock-index.html')
                   .done()
-
                // *Starting the server:
                .start()
                .then(({ address }) => {
@@ -288,7 +294,6 @@ describe('Boot', function(){
                .static
                   .index('./mock/mock-index.html', {root_only:false})
                   .done()
-
                // *Starting the server:
                .start()
                .then(({ address }) => {
