@@ -1,9 +1,10 @@
 // *Requiring the needed modules:
-const StaticConfigurator = require('./static-configurator.js');
-const APIConfigurator = require('./api-configurator.js');
-const boot_server = require('./boot-server.js');
-const { HOOKS } = require('./hooks.js');
+const StaticConfigurator = require('./static-configurator');
+const APIConfigurator = require('./api-configurator');
+const boot_server = require('./boot-server');
+const { HOOKS } = require('./utils/hooks');
 const EventEmitter = require('events');
+const fs = require('fs');
 
 
 
@@ -22,6 +23,12 @@ module.exports = class Configurator{
        * @type {number|string}
        */
       this._server_port = 80;
+
+      /**
+       * Secure (HTTPS) server options
+       * @type {object}
+       */
+      this._secure = null;
 
       /**
        * Inner configurator for static resources
@@ -129,6 +136,44 @@ module.exports = class Configurator{
 
 
    /**
+    * Swicthes the server to use HTTPS
+    * @param  {object} options            HTTPS configurations
+    * @param  {string} options.cert       The HTTPS certificate
+    * @param  {string} options.key        The HTTPS key
+    * @param  {string} options.pfx        The HTTPS pfx
+    * @param  {string} options.passphrase The HTTPS pfx password
+    * @param  {boolean} is_file           Whether the options values are filenames, and should be retrieved from disk
+    * @return {Configurator}              This configurator (for method chaining)
+    */
+   HTTPS(options, is_file){
+      // *Initializing the secure options object:
+      this._secure = {};
+
+      // *Setting the secure options:
+      this._secure.key        = options.key;
+      this._secure.cert       = options.cert;
+      this._secure.pfx        = options.pfx;
+      this._secure.passphrase = options.passphrase;
+
+      // *Checking if the file flag was set:
+      if(is_file){
+         // *If it was:
+         // *Getting each secure option:
+         for(let config_prop in this._secure){
+            if(this._secure.hasOwnProperty(config_prop)){
+               // *Reading the file and then setting the content in the object:
+               this._secure[config_prop] = fs.readFileSync(this._secure[config_prop], 'utf8');
+            }
+         }
+      }
+
+      // *Returning this configurator:
+      return this;
+   }
+
+
+
+   /**
     * Registers a handler for a given event
     * @param  {string} event      The event name
     * @param  {function} listener The handler function
@@ -154,6 +199,7 @@ module.exports = class Configurator{
       // *Setting the server start promise:
       this._server_start_promise = boot_server.start({
             server_port: this._server_port,
+            secure: this._secure,
             not_found_middlewares: this._not_found_middlewares,
             index: this._static._index,
             static_resources: this._static.resources,

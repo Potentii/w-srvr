@@ -1,6 +1,6 @@
 // *Running all the tests suites:
-require('./general.js');
-require('./static.js');
-require('./methods.js');
-require('./api.js');
-require('./boot.js');
+require('./general');
+require('./static');
+require('./methods');
+require('./api');
+require('./boot');

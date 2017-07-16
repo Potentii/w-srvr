@@ -1,7 +1,8 @@
 // *Requiring the needed modules:
-const { METHODS, isMethodSupported } = require('./methods.js');
-const APIResource = require('./api-resource.js');
-const AdvancedAPIConfigurator = require('./advanced-api-configurator.js');
+const { METHODS, isMethodSupported } = require('./utils/methods');
+const APIResource = require('./types/api-resource');
+const AdvancedAPIConfigurator = require('./advanced-api-configurator');
+
 
 
 /**

@@ -1,6 +1,6 @@
 // *Requiring the needed modules:
-const { isMethodSupported } = require('./methods.js');
-const AdvancedAPIConfigurator = require('./advanced-api-configurator.js');
+const { isMethodSupported } = require('../utils/methods');
+const AdvancedAPIConfigurator = require('../advanced-api-configurator');
 
 
 
@@ -36,10 +36,12 @@ module.exports = class APIResource{
       if(methods.some(m => !isMethodSupported(m)))
          throw new Error('Some of the following HTTP methods: \"[' + methods.join(', ') + ']\" are not supported');
 
+      middleware = middleware === undefined || middleware === null ? [] : middleware;
+
       // *Setting this object's attributes:
       this._methods = methods;
       this._route = route;
-      this._middleware = middleware;
+      this._middlewares = Array.isArray(middleware) ? middleware : [middleware];
       this.advanced = advanced;
    }
 
@@ -51,7 +53,7 @@ module.exports = class APIResource{
     * @type {string[]}
     */
    get methods(){
-      return this._methods.concat([]);
+      return this._methods;
    }
 
 
@@ -68,12 +70,12 @@ module.exports = class APIResource{
 
 
    /**
-    * The middleware function
+    * The middlewares functions
     * @readonly
-    * @type {function|function[]}
+    * @type {function[]}
     */
-   get middleware(){
-      return this._middleware;
+   get middlewares(){
+      return this._middlewares;
    }
 
 

@@ -1,5 +1,5 @@
 // *Requiring the needed modules:
-const { METHODS, isMethodSupported } = require('../libs/methods.js');
+const { METHODS, isMethodSupported } = require('../libs/utils/methods');
 const { expect } = require('chai');
 
 

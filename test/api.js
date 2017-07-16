@@ -1,8 +1,8 @@
 // *Requiring the needed modules:
 const Configurator = require('..');
-const AdvancedAPIConfigurator = require('../libs/advanced-api-configurator.js');
-const APIResource = require('../libs/api-resource.js');
-const { isMethodSupported } = require('../libs/methods.js');
+const AdvancedAPIConfigurator = require('../libs/advanced-api-configurator');
+const APIResource = require('../libs/types/api-resource');
+const { isMethodSupported } = require('../libs/utils/methods');
 const path = require('path');
 const { expect } = require('chai');
 
