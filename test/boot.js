@@ -44,7 +44,7 @@ describe('Boot', function(){
 
    it('resolves into a \"{ server, address }\" object', function(done){
       // *Adding resources:
-      configurator
+      configurator.port(3000)
          .start()
          .then(output => {
             // *Expecting the resolved object to have the 'server' and 'address' attributes:
@@ -67,7 +67,7 @@ describe('Boot', function(){
          let control = 0;
 
          // *Assigning some hook functions and starting the server:
-         configurator
+         configurator.port(3000)
             .on(Configurator.HOOKS.BEFORE_SETUP, () => control++)
 
             .on(Configurator.HOOKS.BEFORE_API_SETUP, () => control++)
@@ -90,7 +90,7 @@ describe('Boot', function(){
 
    it('ends responses chains', function(done){
       // *Adding a route that tries to chain with others:
-      configurator
+      configurator.port(3000)
          .api
             .get('/', (req, res, next) => {
                res.status(200);
@@ -115,7 +115,7 @@ describe('Boot', function(){
 
       it('defaults the initial status code to \"404 NOT FOUND\" for each route', function(done){
          // *Adding a route that just responds back:
-         configurator
+         configurator.port(3000)
             .api
                .get('/', (req, res, next) => res.end())
                .done()
@@ -134,7 +134,7 @@ describe('Boot', function(){
 
       it('sends a \"404 NOT FOUND\" response only if none of the routes matches', function(done){
          // *Adding a route that just responds back with a '200 OK' code:
-         configurator
+         configurator.port(3000)
             .api
                .get('/', (req, res, next) => res.status(200).end())
                .done()
@@ -159,7 +159,7 @@ describe('Boot', function(){
 
       it('executes the custom \"not found\" middleware', function(done){
          // *Adding a custom 404 handler middleware:
-         configurator
+         configurator.port(3000)
             .notFound((req, res, next) => res.send('zzz').end())
             // *Starting the server:
             .start()
@@ -179,7 +179,7 @@ describe('Boot', function(){
 
       it('allows the custom \"not found\" middleware to change the response status', function(done){
          // *Adding a custom 404 handler middleware that changes the response status:
-         configurator
+         configurator.port(3000)
             .notFound((req, res, next) => res.status(200).end())
             // *Starting the server:
             .start()
@@ -196,7 +196,7 @@ describe('Boot', function(){
 
       it('ends responses chain after the custom \"not found\" middleware', function(done){
          // *Adding a custom 404 handler middleware that tries to chain with other middlewares:
-         configurator
+         configurator.port(3000)
             .notFound((req, res, next) => {
                res.status(200);
                next();
@@ -221,7 +221,7 @@ describe('Boot', function(){
 
       it('configures resources correctly', function(done){
          // *Adding resources:
-         configurator
+         configurator.port(3000)
             .static
                .add('/static', './mock/mock-src')
                .done()
@@ -256,7 +256,7 @@ describe('Boot', function(){
 
          it('sends the index page only in root by default', function(done){
             // *Adding resources:
-            configurator
+            configurator.port(3000)
                .static
                   .index('./mock/mock-index.html')
                   .done()
@@ -290,7 +290,7 @@ describe('Boot', function(){
 
          it('sends the index page on all available routes if \"root_only\" is set to \"false\"', function(done){
             // *Adding resources:
-            configurator
+            configurator.port(3000)
                .static
                   .index('./mock/mock-index.html', {root_only:false})
                   .done()
@@ -331,7 +331,8 @@ describe('Boot', function(){
 
       it('configures resources correctly', function(done){
          // *Adding resources:
-         configurator.api
+         configurator.port(3000)
+            .api
             .get('/zzz', (req, res, next) => {
                res.status(200).send('a').end();
             })
@@ -375,7 +376,8 @@ describe('Boot', function(){
 
       it('applies advanced headers correctly', function(done){
          // *Adding resources:
-         configurator.api
+         configurator.port(3000)
+            .api
             .get('/*', (req, res, next) => next())
                .advanced
                .allowedOrigins('zzz.com')
@@ -438,7 +440,8 @@ describe('Boot', function(){
 
       it('applies CORS preflight headers correctly', function(done){
          // *Adding resources:
-         configurator.api
+         configurator.port(3000)
+            .api
             .post('/zzz', (req, res, next) => res.end())
                .advanced
                .allowedOrigins('zzz.com')
@@ -494,7 +497,8 @@ describe('Boot', function(){
          const BODY_JSON = JSON.stringify({ping: 'pong'});
 
          // *Adding resources:
-         configurator.api
+         configurator.port(3000)
+            .api
             .post('/echo', (req, res, next) => res.send(req.body).end())
                .advanced
                .parseJSON()

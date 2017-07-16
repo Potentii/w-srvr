@@ -9,5 +9,3 @@ cache:
 
 notifications:
    email: false
-
-sudo: required
