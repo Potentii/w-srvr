@@ -22,7 +22,7 @@ module.exports = class Configurator{
        * @private
        * @type {number|string}
        */
-      this._server_port = 80;
+      this._server_port = null;
 
       /**
        * Secure (HTTPS) server options
@@ -145,27 +145,15 @@ module.exports = class Configurator{
     * @param  {boolean} is_file           Whether the options values are filenames, and should be retrieved from disk
     * @return {Configurator}              This configurator (for method chaining)
     */
-   HTTPS(options, is_file){
+   https(options, is_file){
       // *Initializing the secure options object:
       this._secure = {};
 
       // *Setting the secure options:
-      this._secure.key        = options.key;
-      this._secure.cert       = options.cert;
-      this._secure.pfx        = options.pfx;
-      this._secure.passphrase = options.passphrase;
-
-      // *Checking if the file flag was set:
-      if(is_file){
-         // *If it was:
-         // *Getting each secure option:
-         for(let config_prop in this._secure){
-            if(this._secure.hasOwnProperty(config_prop)){
-               // *Reading the file and then setting the content in the object:
-               this._secure[config_prop] = fs.readFileSync(this._secure[config_prop], 'utf8');
-            }
-         }
-      }
+      this._secure.key        = is_file && options.key        ? fs.readFileSync(options.key, 'utf8')        : options.key;
+      this._secure.cert       = is_file && options.cert       ? fs.readFileSync(options.cert, 'utf8')       : options.cert;
+      this._secure.pfx        = is_file && options.pfx        ? fs.readFileSync(options.pfx)                : options.pfx;
+      this._secure.passphrase = is_file && options.passphrase ? fs.readFileSync(options.passphrase, 'utf8') : options.passphrase;
 
       // *Returning this configurator:
       return this;
@@ -248,6 +236,12 @@ module.exports = class Configurator{
     * @type {number|string}
     */
    get server_port(){
+      // *Checking if the server port is set:
+      if(this._server_port === null || this._server_port === undefined)
+         // *If it isn't:
+         // *Returning the default server port for the current protocol (HTTPS or HTTP):
+         return this._secure ? 443 : 80;
+
       // *Returning the server port:
       return this._server_port;
    }

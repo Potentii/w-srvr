@@ -1,3 +1,6 @@
+.rnd
+/test/mock/https/*
+
 # Logs
 logs
 *.log

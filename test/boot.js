@@ -42,9 +42,9 @@ describe('Boot', function(){
    });
 
 
-   it('resolves into a \"{ server, address }\" object', function(done){
+   it('resolves into a \"{ server, address }\" object', function(){
       // *Adding resources:
-      configurator.port(3000)
+      return configurator.port(3000)
          .start()
          .then(output => {
             // *Expecting the resolved object to have the 'server' and 'address' attributes:
@@ -52,22 +52,60 @@ describe('Boot', function(){
                .to.have.ownProperty('server');
             expect(output)
                .to.have.ownProperty('address');
-         })
-         // *If everything went well, finishing this unit:
-         .then(() => done())
-         // *If some error occured, finishing this unit with an error:
-         .catch(done);
+         });
+   });
+
+
+   describe('HTTPS', function(){
+
+      it('starts an HTTPS server using \"key\" and \"cert\"', function(){
+         // *Starting the server:
+         return configurator.port(3000)
+            .https({ key: './test/mock/https/key.key', cert: './test/mock/https/cert.crt' }, true)
+            .api
+               .get('/', (req, res, next) => res.status(200).end())
+               .done()
+            .start()
+            .then(({ address }) => {
+               // *Expecting the protocol to be HTTPS:
+               expect(address.protocol).to.equal('https:');
+
+               // *Expecting the resources to be responding correctly:
+               return requestAsPromise(Configurator.METHODS.GET, address.href)
+                  .then(res => expect(res.response.statusCode).to.equal(200));
+            });
+      });
+
+
+      it('starts an HTTPS server using \"pfx\" and \"passphrase\"', function(){
+         // *Starting the server:
+         return configurator.port(3000)
+            .https({ pfx: './test/mock/https/pfx.pfx', passphrase: './test/mock/https/pass.txt' }, true)
+            .api
+               .get('/', (req, res, next) => res.status(200).end())
+               .done()
+            .start()
+            .then(({ address }) => {
+               // *Expecting the protocol to be HTTPS:
+               expect(address.protocol).to.equal('https:');
+
+               // *Expecting the resources to be responding correctly:
+               return requestAsPromise(Configurator.METHODS.GET, address.href)
+                  .then(res => expect(res.response.statusCode).to.equal(200));
+            });
+      });
+
    });
 
 
    describe('Hooks', function(){
 
-      it('calls the hooks functions', function(done){
+      it('calls the hooks functions', function(){
          // *Starting a control variable:
          let control = 0;
 
          // *Assigning some hook functions and starting the server:
-         configurator.port(3000)
+         return configurator.port(3000)
             .on(Configurator.HOOKS.BEFORE_SETUP, () => control++)
 
             .on(Configurator.HOOKS.BEFORE_API_SETUP, () => control++)
@@ -80,17 +118,13 @@ describe('Boot', function(){
             .start()
             // *Expecting that the control variable were assigned correctly (which means that the hooks have been called):
             .then(() => expect(control).to.equal(6))
-            // *If everything went well, finishing this unit:
-            .then(() => done())
-            // *If some error occured, finishing this unit with an error:
-            .catch(done);
       });
 
    });
 
-   it('ends responses chains', function(done){
+   it('ends responses chains', function(){
       // *Adding a route that tries to chain with others:
-      configurator.port(3000)
+      return configurator.port(3000)
          .api
             .get('/', (req, res, next) => {
                res.status(200);
@@ -103,19 +137,15 @@ describe('Boot', function(){
             // *Testing if the response is being sent back:
             return requestAsPromise(Configurator.METHODS.GET, address.href)
                .then(res => expect(res.response.statusCode).to.equal(200));
-         })
-         // *If everything went well, finishing this unit:
-         .then(() => done())
-         // *If some error occured, finishing this unit with an error:
-         .catch(done);
+         });
    });
 
 
    describe('404', function(){
 
-      it('defaults the initial status code to \"404 NOT FOUND\" for each route', function(done){
+      it('defaults the initial status code to \"404 NOT FOUND\" for each route', function(){
          // *Adding a route that just responds back:
-         configurator.port(3000)
+         return configurator.port(3000)
             .api
                .get('/', (req, res, next) => res.end())
                .done()
@@ -125,16 +155,12 @@ describe('Boot', function(){
                // *Testing if the response is being sent back with the default status code:
                return requestAsPromise(Configurator.METHODS.GET, address.href)
                   .then(res => expect(res.response.statusCode).to.equal(404));
-            })
-            // *If everything went well, finishing this unit:
-            .then(() => done())
-            // *If some error occured, finishing this unit with an error:
-            .catch(done);
+            });
       });
 
-      it('sends a \"404 NOT FOUND\" response only if none of the routes matches', function(done){
+      it('sends a \"404 NOT FOUND\" response only if none of the routes matches', function(){
          // *Adding a route that just responds back with a '200 OK' code:
-         configurator.port(3000)
+         return configurator.port(3000)
             .api
                .get('/', (req, res, next) => res.status(200).end())
                .done()
@@ -150,16 +176,12 @@ describe('Boot', function(){
                   requestAsPromise(Configurator.METHODS.GET, address.href + 'zzz')
                      .then(res => expect(res.response.statusCode).to.equal(404))
                ]);
-            })
-            // *If everything went well, finishing this unit:
-            .then(() => done())
-            // *If some error occured, finishing this unit with an error:
-            .catch(done);
+            });
       });
 
-      it('executes the custom \"not found\" middleware', function(done){
+      it('executes the custom \"not found\" middleware', function(){
          // *Adding a custom 404 handler middleware:
-         configurator.port(3000)
+         return configurator.port(3000)
             .notFound((req, res, next) => res.send('zzz').end())
             // *Starting the server:
             .start()
@@ -170,16 +192,12 @@ describe('Boot', function(){
                      expect(res.response.statusCode).to.equal(404);
                      expect(res.body.toString()).to.equal('zzz');
                   });
-            })
-            // *If everything went well, finishing this unit:
-            .then(() => done())
-            // *If some error occured, finishing this unit with an error:
-            .catch(done);
+            });
       });
 
-      it('allows the custom \"not found\" middleware to change the response status', function(done){
+      it('allows the custom \"not found\" middleware to change the response status', function(){
          // *Adding a custom 404 handler middleware that changes the response status:
-         configurator.port(3000)
+         return configurator.port(3000)
             .notFound((req, res, next) => res.status(200).end())
             // *Starting the server:
             .start()
@@ -187,16 +205,12 @@ describe('Boot', function(){
                // *Testing if the response is being sent back with the correct status:
                return requestAsPromise(Configurator.METHODS.GET, address.href)
                   .then(res => expect(res.response.statusCode).to.equal(200));
-            })
-            // *If everything went well, finishing this unit:
-            .then(() => done())
-            // *If some error occured, finishing this unit with an error:
-            .catch(done);
+            });
       });
 
-      it('ends responses chain after the custom \"not found\" middleware', function(done){
+      it('ends responses chain after the custom \"not found\" middleware', function(){
          // *Adding a custom 404 handler middleware that tries to chain with other middlewares:
-         configurator.port(3000)
+         return configurator.port(3000)
             .notFound((req, res, next) => {
                res.status(200);
                next();
@@ -207,11 +221,7 @@ describe('Boot', function(){
                // *Testing if the response is being sent back with the correct status:
                return requestAsPromise(Configurator.METHODS.GET, address.href)
                   .then(res => expect(res.response.statusCode).to.equal(200));
-            })
-            // *If everything went well, finishing this unit:
-            .then(() => done())
-            // *If some error occured, finishing this unit with an error:
-            .catch(done);
+            });
       });
 
    });
@@ -219,9 +229,9 @@ describe('Boot', function(){
 
    describe('Static', function(){
 
-      it('configures resources correctly', function(done){
+      it('configures resources correctly', function(){
          // *Adding resources:
-         configurator.port(3000)
+         return configurator.port(3000)
             .static
                .add('/static', './mock/mock-src')
                .done()
@@ -244,19 +254,15 @@ describe('Boot', function(){
                         expect(res.body.toString()).to.be.empty;
                      })
                ]);
-            })
-            // *If everything went well, finishing this unit:
-            .then(() => done())
-            // *If some error occured, finishing this unit with an error:
-            .catch(done);
+            });
       });
 
 
       describe('Index', function(){
 
-         it('sends the index page only in root by default', function(done){
+         it('sends the index page only in root by default', function(){
             // *Adding resources:
-            configurator.port(3000)
+            return configurator.port(3000)
                .static
                   .index('./mock/mock-index.html')
                   .done()
@@ -281,16 +287,12 @@ describe('Boot', function(){
                         })
 
                      ])
-               })
-               // *If everything went well, finishing this unit:
-               .then(() => done())
-               // *If some error occured, finishing this unit with an error:
-               .catch(done);
+               });
          });
 
-         it('sends the index page on all available routes if \"root_only\" is set to \"false\"', function(done){
+         it('sends the index page on all available routes if \"root_only\" is set to \"false\"', function(){
             // *Adding resources:
-            configurator.port(3000)
+            return configurator.port(3000)
                .static
                   .index('./mock/mock-index.html', {root_only:false})
                   .done()
@@ -315,11 +317,7 @@ describe('Boot', function(){
                         })
 
                      ])
-               })
-               // *If everything went well, finishing this unit:
-               .then(() => done())
-               // *If some error occured, finishing this unit with an error:
-               .catch(done);
+               });
          });
 
       });
@@ -329,9 +327,9 @@ describe('Boot', function(){
 
    describe('API', function(){
 
-      it('configures resources correctly', function(done){
+      it('configures resources correctly', function(){
          // *Adding resources:
-         configurator.port(3000)
+         return configurator.port(3000)
             .api
             .get('/zzz', (req, res, next) => {
                res.status(200).send('a').end();
@@ -362,21 +360,14 @@ describe('Boot', function(){
                   let responses_sum = responses.reduce((str, res) => str+res.body.toString(), '');
                   // *Expecting it to be correct:
                   expect(responses_sum).to.equal('abcd');
-                  // *Finishing this unit:
-                  done();
                });
-
-            })
-            .catch(err => {
-               // *Finishing this unit with an error:
-               done(err);
             });
       });
 
 
-      it('applies advanced headers correctly', function(done){
+      it('applies advanced headers correctly', function(){
          // *Adding resources:
-         configurator.port(3000)
+         return configurator.port(3000)
             .api
             .get('/*', (req, res, next) => next())
                .advanced
@@ -424,23 +415,15 @@ describe('Boot', function(){
                         expect(res.response.headers['content-type']).to.equal(undefined);
                      })
 
-                  ])
-                  .then(() => {
-                     // *Finishing this unit:
-                     done();
-                  });
+                  ]);
 
-            })
-            .catch(err => {
-               // *Finishing this unit with an error:
-               done(err);
             });
       });
 
 
-      it('applies CORS preflight headers correctly', function(done){
+      it('applies CORS preflight headers correctly', function(){
          // *Adding resources:
-         configurator.port(3000)
+         return configurator.port(3000)
             .api
             .post('/zzz', (req, res, next) => res.end())
                .advanced
@@ -478,26 +461,18 @@ describe('Boot', function(){
                         expect(res.response.headers['access-control-max-age']).to.equal(undefined);
                      })
 
-                  ])
-                  .then(() => {
-                     // *Finishing this unit:
-                     done();
-                  });
+                  ]);
 
-            })
-            .catch(err => {
-               // *Finishing this unit with an error:
-               done(err);
             });
       });
 
 
-      it('applies the parsers settings correctly', function(done){
+      it('applies the parsers settings correctly', function(){
          // *Defining the body to be parsed:
          const BODY_JSON = JSON.stringify({ping: 'pong'});
 
          // *Adding resources:
-         configurator.port(3000)
+         return configurator.port(3000)
             .api
             .post('/echo', (req, res, next) => res.send(req.body).end())
                .advanced
@@ -524,16 +499,8 @@ describe('Boot', function(){
                         expect(res.body.toString()).to.equal('');
                      })
 
-                  ])
-                  .then(() => {
-                     // *Finishing this unit:
-                     done();
-                  });
+                  ]);
 
-            })
-            .catch(err => {
-               // *Finishing this unit with an error:
-               done(err);
             });
       });
 
@@ -555,12 +522,20 @@ function requestAsPromise(method, url, headers, body){
    // *Returning the request promise:
    return new Promise((resolve, reject) => {
       // *Making the request:
-      request({ method, url, headers, body },
-      (err, response, body) => {
-         // *If some error occurred, rejecting the promise:
-         if(err) return reject(err);
-         // *Resolving the promise with the response from the server:
-         resolve({ response, body });
-      });
+      request({
+            method,
+            url,
+            headers,
+            body,
+            rejectUnauthorized: false,
+            requestCert: true,
+            agent: false
+         },
+         (err, response, body) => {
+            // *If some error occurred, rejecting the promise:
+            if(err) return reject(err);
+            // *Resolving the promise with the response from the server:
+            resolve({ response, body });
+         });
    });
 }

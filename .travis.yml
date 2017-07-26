@@ -7,5 +7,12 @@ cache:
    directories:
       - node_modules
 
+before_install:
+   - mkdir -p ./test/mock/https
+   - openssl req -subj "/C=BR/ST=São Paulo/L=Campinas/O=Guilherme/CN=Guilherme" -newkey rsa:2048 -days 365 -nodes -x509 -keyout ./test/mock/https/key.key -out ./test/mock/https/cert.crt
+   - openssl pkcs12 -export -out ./test/mock/https/pfx.pfx -inkey ./test/mock/https/key.key -in ./test/mock/https/cert.crt -password pass:123456789
+   - touch ./test/mock/https/pass.txt
+   - echo "123456789" > ./test/mock/https/pass.txt
+
 notifications:
    email: false
