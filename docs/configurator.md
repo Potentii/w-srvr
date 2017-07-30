@@ -147,6 +147,51 @@ server
 
 <br>
 
+### Configurator.prototype.https(options, is\_file)
+
+Switches the server to use HTTPS.
+
+#### Parameters
+
+- `options` _object_ \- The HTTPS options object
+ - `cert` _string_ \- The HTTPS certificate
+ - `key` _string_ \- The HTTPS key
+ - `pfx` _string_ \- The HTTPS pfx
+ - `passphrase` _string_ \- The HTTPS pfx password
+- `is_file` _boolean_ \- Whether the options values are filenames, and should be retrieved from disk
+
+#### Returns
+
+[_Configurator_](#) \- This same configurator (for method chaining)
+
+#### Examples
+
+Using **key** and **certificate** files:
+
+```javascript
+server
+   .https({
+      key: './my-key.key',
+      cert: './my-cert.crt'
+   }, true)
+   // ...
+```
+
+Using a **PFX** file:
+
+```javascript
+server
+   .https({
+      pfx: './my-pfx.pfx',
+      passphrase: './my-pass.txt'
+   }, true)
+   // ...
+```
+
+***
+
+<br>
+
 ### Configurator.prototype.on(event, listener)
 
 Registers a handler for a given event.

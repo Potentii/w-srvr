@@ -17,7 +17,7 @@ let static_configurator = server.static;
 
 _string_ \- The index file path (absolute)
 
-_**Note:** readonly, use the_ [_`index()`_](#staticconfiguratorprototypeindexfile) _method to assign a value._
+_**Note:** readonly, use the_ [_`index()`_](#staticconfiguratorprototypeindexfile-options) _method to assign a value._
 
 ***
 

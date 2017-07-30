@@ -154,7 +154,7 @@ module.exports = class Configurator{
 
 
    /**
-    * Swicthes the server to use HTTPS
+    * Switches the server to use HTTPS
     * @param  {object} options            HTTPS configurations
     * @param  {string} options.cert       The HTTPS certificate
     * @param  {string} options.key        The HTTPS key
@@ -204,7 +204,7 @@ module.exports = class Configurator{
          // *If it isn't:
          // *Setting the server start promise, and starting the server:
          this._server_start_promise = boot_server.startServer({
-               server_port: this._server_port,
+               server_port: this.server_port,
                secure: this._secure,
                not_found_middlewares: this._not_found_middlewares,
                index: this._static._index,
