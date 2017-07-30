@@ -151,6 +151,8 @@ server
 
 Switches the server to use HTTPS.
 
+_**Note:** calling this method will make the default server port to be `443` instead of `80`._
+
 #### Parameters
 
 - `options` _object_ \- The HTTPS options object
