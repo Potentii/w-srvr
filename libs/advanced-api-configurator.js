@@ -1,5 +1,6 @@
 // *Requiring the needed modules:
-const { PARSERS } = require('./parsers.js');
+const { PARSERS } = require('./utils/parsers');
+const ParserData = require('./types/parser-data');
 
 
 
@@ -233,13 +234,13 @@ module.exports = class AdvancedAPIConfigurator{
    /**
     * The parsers list
     * @readonly
-    * @return {Array} An array containing { type, options } objects
+    * @return {Array<ParserData>} An array containing ParserData objects
     */
    get parsers(){
       // *Starting the list:
       let parsers = [];
       // *Filling the list with the map's content:
-      this._parsers.forEach((v, k) => parsers.push({type: k, options: v}));
+      this._parsers.forEach((options, type) => parsers.push(new ParserData(type, options)));
       // *Returning the list:
       return parsers;
    }

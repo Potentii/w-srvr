@@ -15,6 +15,7 @@ It makes the process of setting up a web server less verbose, by wrapping an `Ex
 - [Other examples](#other-examples)
  - [Website](#website)
  - [Web service](#web-service)
+ - [HTTPS](#https)
  - [CORS](#cors)
  - [Body parsing](#body-parsing)
 - [Testing](#testing)
@@ -115,7 +116,7 @@ _**See:**_
 
 - [_StaticConfigurator_](docs/static-configurator.md)
 - [*StaticConfigurator.prototype.add(route, resource\_path)*](docs/static-configurator.md#staticconfiguratorprototypeaddroute-resource_path)
-- [_StaticConfigurator.prototype.index(file)_](docs/static-configurator.md#staticconfiguratorprototypeindexfile)
+- [_StaticConfigurator.prototype.index(file)_](docs/static-configurator.md#staticconfiguratorprototypeindexfile-options)
 
 ***
 
@@ -199,6 +200,38 @@ _**See:**_
 - [_APIConfigurator.prototype.options(route, middleware)_](docs/api-configurator.md#apiconfiguratorprototypeoptionsroute-middleware)
 - [_APIConfigurator.prototype.all(route, middleware)_](docs/api-configurator.md#apiconfiguratorprototypeallroute-middleware)
 - [_APIConfigurator.prototype.most(route, middleware)_](docs/api-configurator.md#apiconfiguratorprototypemostroute-middleware)
+
+***
+
+<br>
+
+### HTTPS
+
+It's simple to configure an HTTPS server using a **key** and **certificate**:
+
+```javascript
+server
+   .https({
+      key: './my-key.key',
+      cert: './my-cert.crt'
+   }, true)
+   // ...
+```
+
+or using a **PFX** file:
+
+```javascript
+server
+   .https({
+      pfx: './my-pfx.pfx',
+      passphrase: './my-pass.txt'
+   }, true)
+   // ...
+```
+
+_**See:**_
+
+- [*Configurator.prototype.https(options, is\_file)*](docs/configurator.md#configuratorprototypehttpsoptions-is_file)
 
 ***
 
