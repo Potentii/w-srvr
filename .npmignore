@@ -1,4 +1,4 @@
 .tern-project
 .gitattributes
 .rnd
-/test/mock/https/*
+/test

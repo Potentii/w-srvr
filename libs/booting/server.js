@@ -1,69 +1,22 @@
-/**
- * The server instance
- */
-let server = null;
-
-/**
- * A set of connection sockets
- * @type {Object}
- */
-const sockets = {};
-
-
-
-/**
- * Sets up and starts the Web Server
- * @param  {object} settings The settings to configure the server
- * @return {Promise}         The start task promise
- * @author Guilherme Reginaldo Ruella
- */
-function start(settings){
-   // *Checking if the settings wasn't set, and if didn't, rejecting the promise:
-   if(!settings)
-      return Promise.reject(new Error('Missing w-srvr settings'));
-
-   // *Starting the web server:
-   return startServer(settings)
-      // *Handling exceptions:
-      .catch(err => {
-         // *If something went wrong:
-         // *Stopping the service:
-         return stop()
-            // *Rejecting the promise chain:
-            .then(() => Promise.reject(err));
-      });
-}
-
-
-
-/**
- * Ends the Web Server gently
- * @return {Promise} The stopping promise
- * @author Guilherme Reginaldo Ruella
- */
-function stop(){
-   // *Stopping the web server:
-   return stopServer();
-}
-
-
 
 /**
  * Starts the web server
- * @param  {object} settings The settings to configure the server
- * @return {Promise}         The server starting promise
+ * @param  {object} settings                 The settings to configure the server
+ * @param  {EventEmitter} ee                 The hooks event emitter
+ * @param  {Map<number,net.Socket>} sockets  The server sockets map
+ * @return {Promise}                         The server starting promise
  * @author Guilherme Reginaldo Ruella
  */
-function startServer({ server_port, secure, not_found_middlewares, index, static_resources, api_resources, ee }){
+function startServer({ server_port, secure, not_found_middlewares, index, static_resources, api_resources }, ee, sockets){
    // *Returning the starting promise:
    return new Promise((resolve, reject) => {
       // *Requiring the needed modules:
-      const { HOOKS } = require('./utils/hooks');
+      const { HOOKS } = require('../utils/hooks');
       const express = require('express');
       const url = require('url');
       const booting = {
-         api: require('./booting/api'),
-         static: require('./booting/static')
+         api: require('./api'),
+         static: require('./static')
       };
 
       // *Preparing the Expressjs instance:
@@ -112,10 +65,9 @@ function startServer({ server_port, secure, not_found_middlewares, index, static
             booting.api.addHeadersFlow(api_resource);
 
             // *Getting each method of this resource:
-            for(let method of api_resource.methods){
+            for(let method of api_resource.methods)
                // *Applying the resource into express:
                app[method.toLowerCase()](api_resource.route, ...api_resource.middlewares);
-            }
          }
 
 
@@ -128,18 +80,16 @@ function startServer({ server_port, secure, not_found_middlewares, index, static
 
 
          // *Checking if there is any static resources set:
-         if(static_resources.length){
+         if(static_resources.length)
             // *If there is:
             // *Serving the static resources (i.e. files):
             booting.static.applyStaticResource(app, static_resources);
-         }
 
          // *Checking if the index file is set:
-         if(index && index.file){
+         if(index && index.file)
             // *If it is:
             // *Serving the index page:
             booting.static.applyIndexPage(app, index);
-         }
 
 
          // *Emitting the 'after static setup' event:
@@ -149,22 +99,20 @@ function startServer({ server_port, secure, not_found_middlewares, index, static
          // *Handling hanging responses:
          app.use((req, res, next) => {
             // *Checking if the status code is different than 404:
-            if(res.statusCode != 404){
+            if(res.statusCode != 404)
                // *If it is:
                // *Ending the response:
                res.end();
-            } else{
+            else
                // *If it's not:
                // *Sending to the 404 middlewares:
                next();
-            }
          });
 
          // *Getting each 'not found' middleware:
-         for(let not_found_middleware of not_found_middlewares){
-            // *Using it:
+         for(let not_found_middleware of not_found_middlewares)
+            // *Applying them:
             app.use(not_found_middleware);
-         }
 
          // *Ending hanging responses (as the custom 404 middleware could left them hanging):
          app.use((req, res, next) => res.end());
@@ -191,22 +139,22 @@ function startServer({ server_port, secure, not_found_middlewares, index, static
             // *Starting up the server using HTTP:
             server = require('http').createServer(app);
 
+
          // *Starting the server:
          server.listen(app.locals.port, () => {
             // *Starting the socket counter:
-            let next_socket_id = 0;
+            let next_socket_id = 1;
 
             // *When a new socket connects:
             server.on('connection', socket => {
                // *Increasing the socket counter:
                let socket_id = next_socket_id++;
                // *Adding the socket into the socket set:
-               sockets[socket_id] = socket;
-
+               sockets.set(socket_id, socket);
                // *When the connection ends:
-               socket.on('close', () => {
+               socket.on('close', had_error => {
                   // *Removing the socket from the set:
-                  delete sockets[socket_id];
+                  sockets.delete(socket_id);
                });
             });
 
@@ -233,38 +181,60 @@ function startServer({ server_port, secure, not_found_middlewares, index, static
 
 /**
  * Stops the Web Server
- * @return {Promise} The stopping promise
+ * @param  {http.Server|https.Server} server The server instance
+ * @param  {Map<number,net.Socket>} sockets  The opened sockets map
+ * @return {Promise}                         The stopping promise
  * @author Guilherme Reginaldo Ruella
  */
-function stopServer(){
+function stopServer(server, sockets){
    // *Returning the stopping promise:
    return new Promise((resolve, reject) => {
       // *Checking if the server was not set, and if it wasn't, resolving the promise:
       if(!server) return resolve();
 
-      // *When the server closes:
-      server.close(err => {
-         server = null;
+      // *Closing the server:
+      server.close(async err => {
+         // *Trying to finish all the connected sockets:
+         try{
+            // *Getting each socket connected:
+            for(let socket of sockets.values()){
+               // *Closing the socket:
+               await closeSocket(socket);
+            }
+            // *Resolving the promise:
+            resolve();
+         } catch(err){
+            // *If something went wrong:
+            // *Rejecting the promise:
+            reject(err);
+         }
+      });
+   });
+}
+
+
+
+/**
+ * Closes a socket
+ * @param  {net.Socket} socket The socket to be closed
+ * @return {Promise}           Resolves when the socket gets closed
+ * @author Guilherme Reginaldo Ruella
+ */
+function closeSocket(socket){
+   // *Returning the closing promise:
+   return new Promise((resolve, reject) => {
+      // *When the socket gets closed:
+      socket.once('close', had_error => {
          // *Resolving the promise:
          resolve();
       });
 
-      // *Trying to finish all the connected sockets:
-      try{
-         // *Getting each socket connected:
-         for(let socket_id in sockets){
-            // *Finishing the socket connection:
-            sockets[socket_id].destroy();
-         }
-      } catch(err){
-         // *If something went wrong:
-         // *Rejecting the promise:
-         reject(err);
-      }
+      // *Finishing the socket connection:
+      socket.destroy();
    });
 }
 
 
 
 // *Exporting this module:
-module.exports = { start, stop };
+module.exports = { startServer, stopServer };

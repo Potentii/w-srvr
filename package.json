@@ -11,8 +11,7 @@
     "express"
   ],
   "scripts": {
-    "test": "mocha test/test.js",
-    "test2": "node test/test.js"
+    "test": "mocha test/test.js"
   },
   "main": "main.js",
   "repository": {
@@ -25,8 +24,9 @@
   "homepage": "https://github.com/Potentii/w-srvr#readme",
   "files": [
     "main.js",
+    "README.md",
+    "LICENSE.txt",
     "libs/",
-    "test/",
     "docs/"
   ],
   "dependencies": {

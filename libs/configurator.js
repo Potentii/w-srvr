@@ -1,7 +1,7 @@
 // *Requiring the needed modules:
 const StaticConfigurator = require('./static-configurator');
 const APIConfigurator = require('./api-configurator');
-const boot_server = require('./boot-server');
+const boot_server = require('./booting/server');
 const { HOOKS } = require('./utils/hooks');
 const EventEmitter = require('events');
 const fs = require('fs');
@@ -65,7 +65,25 @@ module.exports = class Configurator{
        */
       this._server_stop_promise = null;
 
+      /**
+       * The hooks event emitter
+       * @type {EventEmitter}
+       */
       this._ee = new EventEmitter();
+
+      /**
+       * The sockets map
+       *  key: the socket id
+       *  value: the socket itself
+       * @type {Map<number,net.Socket>}
+       */
+      this._sockets = new Map();
+
+      /**
+       * The server instance
+       * @type {http.Server|https.Server}
+       */
+      this._server = null;
    }
 
 
@@ -181,25 +199,35 @@ module.exports = class Configurator{
     * @return {Promise} The promise resolves into an { address, server} object, or it rejects if the server could not be started
     */
    start(){
-      // *Checking if the server start promise is set, and if it is, returning it:
-      if(this._server_start_promise) return this._server_start_promise;
-
-      // *Setting the server start promise:
-      this._server_start_promise = boot_server.start({
-            server_port: this._server_port,
-            secure: this._secure,
-            not_found_middlewares: this._not_found_middlewares,
-            index: this._static._index,
-            static_resources: this._static.resources,
-            api_resources: this._api.resources,
-            ee: this._ee
-         })
-         .then(output => {
-            // *Cleaning the stop promise, so it can be stopped again:
-            this._server_stop_promise = null;
-            // *Returning the output into the promise chain:
-            return output;
-         });
+      // *Checking if the server start promise isn't set yet:
+      if(!this._server_start_promise)
+         // *If it isn't:
+         // *Setting the server start promise, and starting the server:
+         this._server_start_promise = boot_server.startServer({
+               server_port: this._server_port,
+               secure: this._secure,
+               not_found_middlewares: this._not_found_middlewares,
+               index: this._static._index,
+               static_resources: this._static.resources,
+               api_resources: this._api.resources
+            }, this._ee, this._sockets)
+            // *When the server starts:
+            .then(output => {
+               // *Setting the server instance:
+               this._server = output.server;
+               // *Cleaning the stop promise, so it can be stopped again:
+               this._server_stop_promise = null;
+               // *Returning the output into the promise chain:
+               return output;
+            })
+            // *Handling exceptions:
+            .catch(err => {
+               // *If something went wrong:
+               // *Stopping the service:
+               return this.stop()
+                  // *Rejecting the promise chain:
+                  .then(() => Promise.reject(err));
+            });
 
       // *Returning the server start promise:
       return this._server_start_promise;
@@ -212,17 +240,20 @@ module.exports = class Configurator{
     * @return {Promise} The promise resolves if the server could be stopped, or rejects if something goes bad
     */
    stop(){
-      // *Checking if the server stop promise is set, and if it is, returning it:
-      if(this._server_stop_promise) return this._server_stop_promise;
-
-      // *Setting the server stop promise:
-      this._server_stop_promise = boot_server.stop()
-         .then(output => {
-            // *Cleaning the start promise, so it can be started again:
-            this._server_start_promise = null;
-            // *Returning the output into the promise chain:
-            return output;
-         });
+      // *Checking if the server stop promise isn't set yet:
+      if(!this._server_stop_promise)
+         // *If it isn't:
+         // *Setting the server stop promise, and stopping the server:
+         this._server_stop_promise = boot_server.stopServer(this._server, this._sockets)
+            // *When the server stops:
+            .then(output => {
+               // *Resetting the server instance:
+               this._server = null;
+               // *Cleaning the start promise, so it can be started again:
+               this._server_start_promise = null;
+               // *Returning the output into the promise chain:
+               return output;
+            });
 
       // *Returning the server stop promise:
       return this._server_stop_promise;
