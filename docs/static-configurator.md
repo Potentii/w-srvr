@@ -30,7 +30,7 @@ _Array<{ route, path }>_ \- An array containing all the static resources
 - `route` _string_ \- The server route
 - `path` _string_ \- The absolute path to a file/directory in disk
 
-_**Note:** readonly, use the_ [_`add()`_](#staticconfiguratorprototypeaddroute-resource_path) _method to add a new resource._
+_**Note:** readonly, use the_ [_`add()`_](#staticconfiguratorprototypeaddroute-resource_path-options) _method to add a new resource._
 
 ***
 
@@ -70,7 +70,7 @@ server.static
 
 <br>
 
-### StaticConfigurator.prototype.add(route, resource\_path)
+### StaticConfigurator.prototype.add(route, resource\_path, options)
 
 Registers a static directory or file to be served on the given route
 
@@ -78,6 +78,10 @@ Registers a static directory or file to be served on the given route
 
 - `route` _string_ \- The server route
 - `resource_path` _string_ \- The relative/absolute file/directory path
+- `options` _object_ \- The static options object
+ - `options.dotfiles` _string_ \- Express static `dotfiles` property
+ - `options.maxAge` _number_ \- Express static `maxAge` property
+ - `options.etag` _boolean_ \- Express static `etag` property
 
 #### Returns
 
@@ -92,7 +96,7 @@ Registers a static directory or file to be served on the given route
 ```javascript
 server.static
    .add('/static/js', '../src/js')
-   .add('/static/css', '../src/css')
+   .add('/static/css', '../src/css', { dotfiles: 'allow' })
    .add('/static/logo', '../src/images/logo.png');
 ```
 

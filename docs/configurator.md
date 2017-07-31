@@ -156,10 +156,10 @@ _**Note:** calling this method will make the default server port to be `443` ins
 #### Parameters
 
 - `options` _object_ \- The HTTPS options object
- - `cert` _string_ \- The HTTPS certificate
- - `key` _string_ \- The HTTPS key
- - `pfx` _string_ \- The HTTPS pfx
- - `passphrase` _string_ \- The HTTPS pfx password
+ - `options.cert` _string_ \- The HTTPS certificate
+ - `options.key` _string_ \- The HTTPS key
+ - `options.pfx` _string_ \- The HTTPS pfx
+ - `options.passphrase` _string_ \- The HTTPS pfx password
 - `is_file` _boolean_ \- Whether the options values are filenames, and should be retrieved from disk
 
 #### Returns
@@ -188,6 +188,47 @@ server
       passphrase: './my-pass.txt'
    }, true)
    // ...
+```
+
+***
+
+<br>
+
+### Configurator.prototype.locals(key, value)
+
+Sets a new property in the Express `locals` (or the entire `locals` object).
+
+_**Note:** if an object is passed, it will override the `locals` object. Otherwise, the arguments will be processed as a key and a value, and they will be merged into the `locals` object._
+
+#### Parameters
+
+- `key` _object|string_ \- The key of the value, or the entire `locals` object
+- `value` _\*_ \- The value for the given key
+
+#### Returns
+
+[_Configurator_](#) \- This same configurator (for method chaining)
+
+#### Examples
+
+Setting the entire `locals` object:
+
+```javascript
+server
+   .locals({
+      prop1: 'val1',
+      prop2: 'val2'
+   })
+   // other calls to 'locals()' method passing an object will override it
+```
+
+Using key\-value pairs:
+
+```javascript
+server
+   .locals('prop1', 'val1')
+   .locals('prop2', 'val2')
+   // calls to 'locals()' method passing an object will override it
 ```
 
 ***

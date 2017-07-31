@@ -7,7 +7,7 @@
  * @return {Promise}                         The server starting promise
  * @author Guilherme Reginaldo Ruella
  */
-function startServer({ server_port, secure, not_found_middlewares, index, static_resources, api_resources }, ee, sockets){
+function startServer({ server_port, secure, locals, not_found_middlewares, index, static_resources, api_resources }, ee, sockets){
    // *Returning the starting promise:
    return new Promise((resolve, reject) => {
       // *Requiring the needed modules:
@@ -123,6 +123,14 @@ function startServer({ server_port, secure, not_found_middlewares, index, static
          // *Checking if the port could be set, and if it couldn't, throwing an error:
          if(!app.locals.port)
             throw new Error('The server port must be set');
+
+         // *Checking if the locals is an object:
+         if(locals && typeof locals === 'object')
+            // *If it is:
+            // *Merging each property of the locals object into the Express locals object:
+            for(let prop_name in locals)
+               if(locals.hasOwnProperty(prop_name))
+                  app.locals[prop_name] = locals[prop_name];
 
 
          // *Emitting the 'after setup' event:

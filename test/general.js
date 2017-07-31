@@ -40,6 +40,55 @@ describe('General', function(){
    });
 
 
+   it('sets each \'locals\' property as key-value pairs', function(done){
+      // *Setting the locals as key-value pairs:
+      configurator
+         .locals('prop1', 'val1')
+         .locals('prop2', 'val2')
+         .locals('prop3', 'val3');
+
+      // *Expecting that all locals properties have been set correctly:
+      expect(configurator._locals['prop1']).to.equal('val1');
+      expect(configurator._locals['prop2']).to.equal('val2');
+      expect(configurator._locals['prop3']).to.equal('val3');
+
+      // *Finishing this unit:
+      done();
+   });
+
+
+   it('sets the entire \'locals\', given an object', function(done){
+      // *Defining the first object (it will be replaced with the second one):
+      const obj1 = {
+         a: 1,
+         b: 2,
+         c: 3
+      };
+      // *Defining the second object:
+      const obj2 = {
+         x: 3,
+         y: 2,
+         z: 1
+      };
+
+      // *Setting the locals as key-value pairs:
+      configurator
+         .locals(obj1)
+         .locals(obj2);
+
+      // *Expecting that all locals properties have been set correctly (and the obj1 have been replaced with the obj2):
+      expect(configurator._locals.x).to.equal(3);
+      expect(configurator._locals.y).to.equal(2);
+      expect(configurator._locals.z).to.equal(1);
+      expect(configurator._locals).to.not.have.property('a');
+      expect(configurator._locals).to.not.have.property('b');
+      expect(configurator._locals).to.not.have.property('c');
+
+      // *Finishing this unit:
+      done();
+   });
+
+
    it('provides access to the inner \"api\" and \"static\" configurators', function(done){
       // *Getting the types definition:
       const StaticConfigurator = require('../libs/static-configurator.js');
@@ -52,6 +101,7 @@ describe('General', function(){
       // *Finishing this unit:
       done();
    });
+
 
    describe('HTTPS', function(){
 
