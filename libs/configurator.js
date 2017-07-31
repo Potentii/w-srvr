@@ -186,9 +186,9 @@ module.exports = class Configurator{
 
 
    /**
-    * Sets a new property in the express 'locals' (or the entire 'locals' object)
+    * Sets a new property in the Express 'locals' (or the entire 'locals' object)
     *  If an object is passed, it will override the 'locals' object
-    *  Otherwise arguments must will be processed as a key and a value, and they will be merged into the 'locals' object
+    *  Otherwise, the arguments will be processed as a key and a value, and they will be merged into the 'locals' object
     * @param  {object|string} key The key of the value, or the entire 'locals' object
     * @param  {*} value           The value for the given key
     * @return {Configurator}      This configurator (for method chaining)

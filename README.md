@@ -115,7 +115,7 @@ server
 _**See:**_
 
 - [_StaticConfigurator_](docs/static-configurator.md)
-- [*StaticConfigurator.prototype.add(route, resource\_path)*](docs/static-configurator.md#staticconfiguratorprototypeaddroute-resource_path)
+- [*StaticConfigurator.prototype.add(route, resource\_path)*](docs/static-configurator.md#staticconfiguratorprototypeaddroute-resource_path-options)
 - [_StaticConfigurator.prototype.index(file)_](docs/static-configurator.md#staticconfiguratorprototypeindexfile-options)
 
 ***
