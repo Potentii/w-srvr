@@ -13,12 +13,15 @@ function applyStaticResource(app, static_resources){
    // *Defining the static headers middleware:
    const static_middleware = (res, path, stat) => res.status(200);
    // *Getting each static resource:
-   for(let { route, path } of static_resources){
+   for(let { route, path, options } of static_resources){
       // *Serving the static resource:
       app.use(route, express.static(path, {
-         index: false,
-         redirect: false,
-         setHeaders: static_middleware
+         setHeaders: static_middleware,
+         redirect:   false,
+         index:      false,
+         dotfiles:   options.dotfiles,
+         maxAge:     options.maxAge,
+         etag:       options.etag
       }));
    }
 }

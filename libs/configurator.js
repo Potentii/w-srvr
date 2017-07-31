@@ -31,6 +31,12 @@ module.exports = class Configurator{
       this._secure = null;
 
       /**
+       * The Express locals object
+       * @type {object}
+       */
+      this._locals = null;
+
+      /**
        * Inner configurator for static resources
        * @private
        * @type {StaticConfigurator}
@@ -180,6 +186,28 @@ module.exports = class Configurator{
 
 
    /**
+    * Sets a new property in the express 'locals' (or the entire 'locals' object)
+    *  If an object is passed, it will override the 'locals' object
+    *  Otherwise arguments must will be processed as a key and a value, and they will be merged into the 'locals' object
+    * @param  {object|string} key The key of the value, or the entire 'locals' object
+    * @param  {*} value           The value for the given key
+    * @return {Configurator}      This configurator (for method chaining)
+    */
+   locals(key, value){
+      // *Checking if the first argument is an object:
+      if(typeof arguments[0] === 'object')
+         // *If it is:
+         // *Replacing the locals:
+         this._locals = arguments[0];
+      else
+         // *If it isn't:
+         // *Setting the key-value in the locals:
+         this._locals[key] = value;
+   }
+
+
+
+   /**
     * Registers a handler for a given event
     * @param  {string} event      The event name
     * @param  {function} listener The handler function
@@ -204,12 +232,13 @@ module.exports = class Configurator{
          // *If it isn't:
          // *Setting the server start promise, and starting the server:
          this._server_start_promise = boot_server.startServer({
-               server_port: this.server_port,
-               secure: this._secure,
                not_found_middlewares: this._not_found_middlewares,
-               index: this._static._index,
-               static_resources: this._static.resources,
-               api_resources: this._api.resources
+               static_resources:      this._static.resources,
+               api_resources:         this._api.resources
+               server_port:           this.server_port,
+               secure:                this._secure,
+               locals:                this._locals,
+               index:                 this._static._index
             }, this._ee, this._sockets)
             // *When the server starts:
             .then(output => {

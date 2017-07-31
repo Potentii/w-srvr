@@ -52,7 +52,7 @@ module.exports = class StaticConfigurator{
     * @throws {TypeError}                        If the file is not a string
     * @throws {Error}                            If the file does not represent a path to a file
     */
-   index(file, options){
+   index(file, options = {}){
       // *Checking if the file is a string, throwing an error if it isn't:
       if(!(typeof file === 'string'))
          throw new TypeError('The \"file\" must be a string');
@@ -84,12 +84,16 @@ module.exports = class StaticConfigurator{
 
    /**
     * Registers a static directory or file to be served on the given route
-    * @param  {string} route         The server route
-    * @param  {string} resource_path The relative/absolute file/directory path
-    * @return {Configurator}         This configurator (for method chaining)
-    * @throws {TypeError}            If the resource path is not a string
+    * @param  {string} route              The server route
+    * @param  {string} resource_path      The relative/absolute file/directory path
+    * @param  {object} [options]          The static options object
+    * @param  {string} [options.dotfiles] Express static 'dotfiles' property
+    * @param  {number} [options.maxAge]   Express static 'maxAge' property
+    * @param  {boolean} [options.etag]    Express static 'etag' property
+    * @return {Configurator}              This configurator (for method chaining)
+    * @throws {TypeError}                 If the resource path is not a string
     */
-   add(route, resource_path){
+   add(route, resource_path, options = {}){
       // *Checking if the resource path is a string, throwing an error if it isn't:
       if(!(typeof resource_path === 'string'))
          throw new TypeError('The \"resource path\" must be a string');
@@ -101,8 +105,11 @@ module.exports = class StaticConfigurator{
          resource_path = path.join(path.dirname(stack()[1].getFileName()), resource_path);
       }
 
+      // *Setting the options as an object (sinse the user could set it as number, boolean, etc):
+      options = typeof options === 'object' ? options : {};
+
       // *Adding this resource into the array:
-      this._resources.push({ route, path: resource_path });
+      this._resources.push({ route, path: resource_path, options });
       // *Returning this configurator:
       return this;
    }
@@ -131,7 +138,7 @@ module.exports = class StaticConfigurator{
 
 
    /**
-    * Retrieves the static resources (array of '{ route, path }' objects)
+    * Retrieves the static resources (array of '{ route, path, options }' objects)
     * @readonly
     * @type {Array}
     */
