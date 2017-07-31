@@ -55,6 +55,28 @@ describe('Boot', function(){
          });
    });
 
+   it('sets the Express \'locals\' object', function(){
+      // *Defining the locals object:
+      const locals = {
+         a: 1,
+         b: 2,
+         c: 3
+      };
+
+      // *Setting the locals object and serving it:
+      return configurator.port(3000)
+         .locals(locals)
+         .api
+            .get('/', (req, res, next) => res.status(200).json(req.app.locals).end())
+            .done()
+         .start()
+         .then(({ address }) => {
+            // *Expecting the Express locals to be set:
+            return requestAsPromise(Configurator.METHODS.GET, address.href)
+               .then(res => expect(JSON.parse(res.response.body)).to.deep.include(locals));
+         });
+   });
+
 
    describe('HTTPS', function(){
 
@@ -122,7 +144,7 @@ describe('Boot', function(){
 
    });
 
-   it('ends responses chains', function(){
+   it('ends hanging response chains', function(){
       // *Adding a route that tries to chain with others:
       return configurator.port(3000)
          .api
@@ -233,7 +255,7 @@ describe('Boot', function(){
          // *Adding resources:
          return configurator.port(3000)
             .static
-               .add('/static', './mock/mock-src')
+               .add('/static', './mock/mock-src', { dotfiles: 'allow' })
                .done()
             // *Starting the server:
             .start()
@@ -245,6 +267,13 @@ describe('Boot', function(){
                      .then(res => {
                         expect(res.response.statusCode).to.equal(200);
                         expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-src/mock-file.txt'), 'utf8'));
+                     }),
+
+                  // *Testing if dotfiles are being supported:
+                  requestAsPromise(Configurator.METHODS.GET, address.href + 'static/.txt')
+                     .then(res => {
+                        expect(res.response.statusCode).to.equal(200);
+                        expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-src/.txt'), 'utf8'));
                      }),
 
                   // *Testing if a 404 response is being sent if the resource does not exist:
@@ -286,7 +315,7 @@ describe('Boot', function(){
                            expect(res.response.statusCode).to.equal(404);
                         })
 
-                     ])
+                  ]);
                });
          });
 
@@ -316,7 +345,7 @@ describe('Boot', function(){
                            expect(res.body.toString()).to.equal(fs.readFileSync(path.join(__dirname, './mock/mock-index.html'), 'utf8'));
                         })
 
-                     ])
+                  ]);
                });
          });
 

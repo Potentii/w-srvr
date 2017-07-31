@@ -125,15 +125,12 @@ function startServer({ server_port, secure, locals, not_found_middlewares, index
             throw new Error('The server port must be set');
 
          // *Checking if the locals is an object:
-         if(typeof locals === 'object')
-            // *Getting each property of the locals object:
-            for(let prop_name in locals){
-               if(locals.hasOwnProperty(prop_name)){
-                  // *Merging each property of the locals object into the Express locals object:
+         if(locals && typeof locals === 'object')
+            // *If it is:
+            // *Merging each property of the locals object into the Express locals object:
+            for(let prop_name in locals)
+               if(locals.hasOwnProperty(prop_name))
                   app.locals[prop_name] = locals[prop_name];
-               }
-            }
-         }
 
 
          // *Emitting the 'after setup' event:

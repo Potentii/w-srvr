@@ -106,7 +106,7 @@ module.exports = class StaticConfigurator{
       }
 
       // *Setting the options as an object (sinse the user could set it as number, boolean, etc):
-      options = typeof options === 'object' ? options : {};
+      options = options && typeof options === 'object' ? options : {};
 
       // *Adding this resource into the array:
       this._resources.push({ route, path: resource_path, options });

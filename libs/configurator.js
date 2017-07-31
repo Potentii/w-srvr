@@ -195,14 +195,19 @@ module.exports = class Configurator{
     */
    locals(key, value){
       // *Checking if the first argument is an object:
-      if(typeof arguments[0] === 'object')
+      if(arguments[0] && typeof arguments[0] === 'object'){
          // *If it is:
          // *Replacing the locals:
          this._locals = arguments[0];
-      else
+      } else{
          // *If it isn't:
+         // *Initializing the locals, if it isn't an object:
+         this._locals = this._locals && typeof this._locals === 'object' ? this._locals : {};
          // *Setting the key-value in the locals:
          this._locals[key] = value;
+      }
+      // *Returning this configurator:
+      return this;
    }
 
 
@@ -234,7 +239,7 @@ module.exports = class Configurator{
          this._server_start_promise = boot_server.startServer({
                not_found_middlewares: this._not_found_middlewares,
                static_resources:      this._static.resources,
-               api_resources:         this._api.resources
+               api_resources:         this._api.resources,
                server_port:           this.server_port,
                secure:                this._secure,
                locals:                this._locals,
